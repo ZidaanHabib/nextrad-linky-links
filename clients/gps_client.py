@@ -20,7 +20,7 @@ class GPSClient:
 
     def get_altitude(self):
         """ Determine current altitude """
-        nmea_obj = self.getGGA()
+        nmea_obj = self.get_gga_msg()
         alt = nmea_obj.altitude
         return alt
 
