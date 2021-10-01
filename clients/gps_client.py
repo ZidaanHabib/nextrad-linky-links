@@ -13,7 +13,7 @@ class GPSClient:
     def get_gga_msg(self):
         """ Read a GPGGA NMEA message """
         nmea_msg = ''
-        while nmea_msg[0:6] != '$GPGGA':
+        while nmea_msg[0:6] != '$GNGGA':
             nmea_msg = self.ser.readline().decode()
             nmea_msg = nmea_msg[0:len(nmea_msg) - 2]  # exclude <CR><LF> when parsing
         nmea_obj = nmea.parse(nmea_msg)
