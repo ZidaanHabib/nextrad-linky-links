@@ -37,4 +37,4 @@ class GPSClient:
 
 if __name__ == "__main__":
     gps = GPSClient(9600 , 5)
-    gps.continuous_read()
+    print(gps.get_altitude())
