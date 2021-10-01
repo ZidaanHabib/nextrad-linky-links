@@ -1,6 +1,7 @@
 import pynmea2 as nmea
 import serial
 from time import sleep
+from types.gps_location import GPSLocation
 
 
 class GPSClient:
@@ -19,11 +20,32 @@ class GPSClient:
         nmea_obj = nmea.parse(nmea_msg)
         return nmea_obj
 
+    def get_gll_msg(self):
+        """ Read a GPGLL NMEA message """
+        nmea_msg = ''
+        while nmea_msg[0:6] != '$GNGLL':
+            nmea_msg = self.ser.readline().decode()
+            nmea_msg = nmea_msg[0:len(nmea_msg) - 2]  # exclude <CR><LF> when parsing
+        nmea_obj = nmea.parse(nmea_msg)
+        return nmea_obj
+
     def get_altitude(self):
         """ Determine current altitude """
         nmea_obj = self.get_gga_msg()
         alt = nmea_obj.altitude
         return alt
+
+    @staticmethod
+    def get_location(nmea_obj: nmea.nmea.NMEASentenceType):
+        """ Return the current longitude and latitude coordinates as a string
+                    arguments:
+                    nmea_obj -- pynmea2 NMEA object for a GNGLL or GNGGA message
+                    """
+        lat = nmea_obj.latitude
+        lat_direction = nmea_obj.lat_dir
+        long = nmea_obj.longitude
+        long_direction = nmea_obj.lon_dir
+        return GPSLocation(lat, lat_direction, long, long_direction)
 
     def continuous_read(self):
         """ Continously print raw NMEA messages to terminal """
