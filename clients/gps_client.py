@@ -1,5 +1,6 @@
 import pynmea2 as nmea
 import serial
+from time import sleep
 
 
 class GPSClient:
@@ -24,7 +25,16 @@ class GPSClient:
         alt = nmea_obj.altitude
         return alt
 
+    def continuous_read(self):
+        """ Continously print raw NMEA messages to terminal """
+        while True:
+            try:
+                print(self.ser.readline().decode())
+                sleep(0.1)
+            except KeyboardInterrupt:
+                break
+
 
 if __name__ == "__main__":
-    gps = GPSClient(9600,5)
-    print(gps.get_altitude())
+    gps = GPSClient(9600 , 5)
+    gps.continuous_read()
