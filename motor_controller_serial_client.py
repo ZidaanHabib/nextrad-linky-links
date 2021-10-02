@@ -7,6 +7,7 @@ class ControllerSerialClient:
         self._serial_connection = serial.Serial(port='/dev/ttyUSB0',
                                                     baudrate=9600,
                                                     parity=serial.PARITY_NONE,
+                                                    startbit
                                                     stopbits=serial.STOPBITS_ONE)
 
     def send_command(self, axis: int, cmd_char: str, cmd_data: str ) -> None:
@@ -18,6 +19,9 @@ class ControllerSerialClient:
         cmd_list.append(cmd_data)  #  depending on command, additional bytes may need to be sent
         cmd_list.append("\r")  # carriage return stop byte
 
-        cmd = cmd_list.join()
+        cmd = "".join(cmd_list)
         self._serial_connection.write(cmd.encode())
 
+    def receive_response(self) ->str:
+        response = self._serial_connection.read_until(expected='\r')  # controller response has carriage return ending character
+        return response.decodde('UTF-8')
