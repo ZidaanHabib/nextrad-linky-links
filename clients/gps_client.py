@@ -1,7 +1,7 @@
 import pynmea2 as nmea
 import serial
 from time import sleep
-from types.gps_location import GPSLocation
+from dtypes.gps_location import GPSLocation
 
 
 class GPSClient:
