@@ -1,6 +1,7 @@
 import serial
 from interfaces.serial_interface import SerialInterface
 
+
 class SynscanSerialClient(SerialInterface):
 
     def __init__(self):
@@ -59,6 +60,7 @@ class SynscanSerialClient(SerialInterface):
         az_string = az_string[0:-2]  #ignore last 2 chars as per datasheet
         az = float.fromhex(az_string)  # convert from hex string to decimal number
         az = (az/16777216)*360  # convert to degrees
+        return az
 
     def get_elevation(self):
         self.send_command("z")
@@ -67,6 +69,7 @@ class SynscanSerialClient(SerialInterface):
         el_string = el_string[0:-2]  # ignore last 2 chars as per datasheet
         el = float.fromhex(el_string)  # convert from hex string to decimal number
         el = (el / 16777216) * 360  # convert to degrees
+        return el
 
 if __name__ == "__main__":
     sc = SynscanSerialClient()
