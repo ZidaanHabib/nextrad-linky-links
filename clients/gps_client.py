@@ -29,14 +29,20 @@ class GPSClient:
         nmea_obj = nmea.parse(nmea_msg)
         return nmea_obj
 
-    def get_altitude(self):
+    def get_altitude(self) -> float:
         """ Determine current altitude """
         nmea_obj = self.get_gga_msg()
         alt = nmea_obj.altitude
         return alt
 
+    def get_location(self):
+        nmea_obj = self.get_gll_msg()
+        return self.parse_location(nmea_obj)
+
+
+
     @staticmethod
-    def get_location(nmea_obj: nmea.nmea.NMEASentenceType):
+    def parse_location(nmea_obj: nmea.nmea.NMEASentenceType):
         """ Return the current longitude and latitude coordinates as a string
                     arguments:
                     nmea_obj -- pynmea2 NMEA object for a GNGLL or GNGGA message
@@ -46,6 +52,8 @@ class GPSClient:
         long = nmea_obj.longitude
         long_direction = nmea_obj.lon_dir
         return GPSLocation(lat, lat_direction, long, long_direction)
+
+
 
     def continuous_read(self):
         """ Continously print raw NMEA messages to terminal """
