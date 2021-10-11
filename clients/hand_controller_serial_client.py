@@ -54,8 +54,7 @@ class SynscanSerialClient(SerialInterface):
         return response
 
     def get_azimuth(self) -> float:
-        self.send_command("z" + chr(0))
-        response = self.receive_response()
+        response = self.communicate("z")
         az_string = response.split(",")[0]  # get the azimuth portion of controller response
         az_string = az_string[0:-2]  #ignore last 2 chars as per datasheet
         az = float.fromhex(az_string)  # convert from hex string to decimal number
@@ -73,4 +72,8 @@ class SynscanSerialClient(SerialInterface):
 
 if __name__ == "__main__":
     sc = SynscanSerialClient()
-    print(str(sc.get_azimuth()))
+    sc.slew_negative_fixed(1, 9)
+    sleep(5)
+    sc.stop_slew(1)
+    response = sc.get_azimuth()
+    print(response)
