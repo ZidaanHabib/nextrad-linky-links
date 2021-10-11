@@ -1,6 +1,6 @@
 import serial
 from interfaces.serial_interface import SerialInterface
-
+from time import sleep
 
 class SynscanSerialClient(SerialInterface):
 
@@ -49,12 +49,12 @@ class SynscanSerialClient(SerialInterface):
         return response.decodde('UTF-8')
 
     def communicate(self, cmd: str):
-        self.send_command(cmd.encode())
+        self.send_command(cmd)
         response = self.receive_response()
         return response
 
     def get_azimuth(self) -> float:
-        self.send_command("z")
+        self.send_command("z" + chr(0))
         response = self.receive_response()
         az_string = response.split()[0]  # get the azimuth portion of controller response
         az_string = az_string[0:-2]  #ignore last 2 chars as per datasheet
@@ -73,3 +73,4 @@ class SynscanSerialClient(SerialInterface):
 
 if __name__ == "__main__":
     sc = SynscanSerialClient()
+    print(sc.communicate("z"))
