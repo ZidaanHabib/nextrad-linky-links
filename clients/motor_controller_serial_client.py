@@ -7,7 +7,6 @@ class ControllerSerialClient:
         self._serial_connection = serial.Serial(port='/dev/ttyUSB0',
                                                     baudrate=9600,
                                                     parity=serial.PARITY_NONE,
-                                                    startbit
                                                     stopbits=serial.STOPBITS_ONE)
 
     def send_command(self, axis: int, cmd_char: str, cmd_data: str ) -> None:
