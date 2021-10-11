@@ -45,8 +45,8 @@ class SynscanSerialClient(SerialInterface):
         self._serial_connection.write(cmd.encode())
 
     def receive_response(self):
-        response = self._serial_connection.read_until(expected='#')  # controller response has # ending char
-        return response.decodde('UTF-8')
+        response = self._serial_connection.read_until(expected=b'#')  # controller response has # ending char
+        return response.decode('UTF-8')
 
     def communicate(self, cmd: str):
         self.send_command(cmd)
@@ -56,7 +56,7 @@ class SynscanSerialClient(SerialInterface):
     def get_azimuth(self) -> float:
         self.send_command("z" + chr(0))
         response = self.receive_response()
-        az_string = response.split()[0]  # get the azimuth portion of controller response
+        az_string = response.split(",")[0]  # get the azimuth portion of controller response
         az_string = az_string[0:-2]  #ignore last 2 chars as per datasheet
         az = float.fromhex(az_string)  # convert from hex string to decimal number
         az = (az/16777216)*360  # convert to degrees
@@ -65,7 +65,7 @@ class SynscanSerialClient(SerialInterface):
     def get_elevation(self):
         self.send_command("z")
         response = self.receive_response()
-        el_string = response.split()[1]  # get the azimuth portion of controller response
+        el_string = response.split(",")[1]  # get the azimuth portion of controller response
         el_string = el_string[0:-2]  # ignore last 2 chars as per datasheet
         el = float.fromhex(el_string)  # convert from hex string to decimal number
         el = (el / 16777216) * 360  # convert to degrees
@@ -73,4 +73,4 @@ class SynscanSerialClient(SerialInterface):
 
 if __name__ == "__main__":
     sc = SynscanSerialClient()
-    print(sc.communicate("z"))
+    print(str(sc.get_azimuth()))
