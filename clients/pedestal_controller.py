@@ -1,5 +1,5 @@
 from clients.gps_client import GPSClient
-from types.gps_location import GPSLocation
+from dtypes.gps_location import GPSLocation
 from clients.hand_controller_serial_client import SynscanSerialClient
 from interfaces.serial_interface import SerialInterface
 from configparser import ConfigParser
@@ -17,13 +17,14 @@ class PedestalController:
         self._az_offset: float = self._serial_client.get_azimuth()
         self._el_offset: float = self._serial_client.get_elevation()
 
-        self.az_current = 0.0
-        self.el_Current = 0.0
+        self._az_current = 0.0
+        self._el_current = 0.0
 
         self._az_limits = [-1, -1]
         self._el_limits = [-1, -1]
         self._slew_rate_limit = 100000
 
+    """Setter methods: """
     def set_location(self, latitude: float, lat_dir: chr, longitude: float, long_dir: chr) -> None:
         """ Manually set location if GPS device not funcitonning correctly"""
         self._location = GPSLocation(latitude, lat_dir, longitude, long_dir)
@@ -40,4 +41,15 @@ class PedestalController:
 
     def set_slew_rate_limit(self, limit: float):
         self._slew_rate_limit = limit
+
+    """Getter methods:"""
+    def get_location(self):
+        return self._location.__repr__()
+
+    def get_azimuth(self):
+        return self._az_current
+
+    def get_elevation(self):
+        return self._el_current
+
 
