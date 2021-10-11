@@ -1,5 +1,5 @@
 import serial
-from interfaces.serial_client import SerialInterface
+from interfaces.serial_interface import SerialInterface
 
 class SynscanSerialClient(SerialInterface):
 
@@ -24,7 +24,7 @@ class SynscanSerialClient(SerialInterface):
         msg: str = "P" + chr(2) + axis_char + chr(37) + chr(slew_rate_preset) + chr(0) * 3
         self.send_command(msg)
 
-    def slew_positive_variable(self, ):
+    #def slew_positive_variable(self, rate: float ):
 
 
     def stop_slew(self, axis):
@@ -48,10 +48,25 @@ class SynscanSerialClient(SerialInterface):
         return response.decodde('UTF-8')
 
     def communicate(self, cmd: str):
-        self.send_command(cmd)
+        self.send_command(cmd.encode())
         response = self.receive_response()
         return response
 
+    def get_azimuth(self) -> float:
+        self.send_command("z")
+        response = self.receive_response()
+        az_string = response.split()[0]  # get the azimuth portion of controller response
+        az_string = az_string[0:-2]  #ignore last 2 chars as per datasheet
+        az = float.fromhex(az_string)  # convert from hex string to decimal number
+        az = (az/16777216)*360  # convert to degrees
+
+    def get_elevation(self):
+        self.send_command("z")
+        response = self.receive_response()
+        el_string = response.split()[1]  # get the azimuth portion of controller response
+        el_string = el_string[0:-2]  # ignore last 2 chars as per datasheet
+        el = float.fromhex(el_string)  # convert from hex string to decimal number
+        el = (el / 16777216) * 360  # convert to degrees
 
 if __name__ == "__main__":
-
+    sc = SynscanSerialClient()
