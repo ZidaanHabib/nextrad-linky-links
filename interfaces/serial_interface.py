@@ -20,3 +20,9 @@ class SerialInterface:
         self.send_command(cmd)
         response = self.receive_response()
         return response
+
+    def get_azimuth(self):
+        pass
+
+    def get_elevation(self):
+        pass
