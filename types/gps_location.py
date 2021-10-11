@@ -23,3 +23,7 @@ class GPSLocation:
         """ Method to get longitude direction"""
         return self._long_direction
 
+    def __repr__(self):
+        location_string = str(self._latitude) + ", " + self._lat_direction \
+        + str(self._longitude) + ", " + self._long_direction
+        return location_string
