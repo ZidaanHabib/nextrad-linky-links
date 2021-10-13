@@ -9,27 +9,36 @@ import os
 class PedestalController:
 
     def __init__(self, serial_client: SerialInterface, gps_client):
-        self._serial_client = serial_client
-        self._gps_client = gps_client
+        self._serial_client: SerialInterface = serial_client
+        self._gps_client: GPSClient = gps_client
 
         self._location: GPSLocation = gps_client.get_location()
         self._altitude: float = gps_client.get_altitude()
 
-        self._az_offset: float = self._serial_client.get_azimuth()
-        self._el_offset: float = self._serial_client.get_elevation()
+        # DEFAULT VALUES:
+        self._az_offset: float = 0
+        self._el_offset: float = 0
 
-        self._az_current = 0.0
-        self._el_current = 0.0
+        self._az_current: float = 0.0
+        self._el_current: float = 0.0
 
-        self._az_limits = [-1, -1]
-        self._el_limits = [-1, -1]
-        self._slew_rate_limit = 100000
+        self._az_limits: [float] = [-1, -1]
+        self._el_limits: [float] = [-1, -1]
+        self._slew_rate_limit: float = 100000
+        self.controller_init()
 
     def controller_init(self) -> None:
         self._cf = ConfigParser("config.ini")
         self._az_limits = [self._cf["Constraints"]["MinAzimuth"], self._cf["Constraints"]["MaxAzimuth"]]
         self._el_limits = [self._cf["Constraints"]["MinElevation"], self._cf["Constraints"]["MaxElevation"]]
         self._slew_rate_limit = self._cf["Constraints"]["MaxSlewRate"]
+        self._az_offset: float = self._serial_client.get_azimuth()
+        self._el_offset: float = self._serial_client.get_elevation()
+
+    def update_config_file(self) -> None:
+        """ Update config.ini file """
+        with open("config.ini", "w") as f:
+            self._cf.write(f)
 
     """Setter methods: """
     def set_location(self, latitude: float, lat_dir: chr, longitude: float, long_dir: chr) -> None:
@@ -43,14 +52,20 @@ class PedestalController:
     def set_az_limits(self, az_limit: [float]) -> None:
         """ Set azimuth limits for pedestal"""
         self._az_limits = az_limit
+        self._cf["Constraints"]["MinAzimuth"] = str(self._az_limits[0])  # write to config file
+        self._cf["Constraints"]["MinAzimuth"] = str(self._az_limits[1])  # write to config file
+        self.update_config_file()
+
 
     def set_el_limits(self, el_limits: [float]) -> None:
         """ Set elevation limits for pedestal"""
         self._el_limits = el_limits
+        self.update_config_file()
 
     def set_slew_rate_limit(self, limit: float) -> None:
         """ Set slew rate limits for pedestal"""
         self._slew_rate_limit = limit
+        self.update_config_file()
 
     """Getter methods:"""
     def get_location(self):
