@@ -22,7 +22,8 @@ class PedestalController:
         self._az_current: float = 0.0
         self._el_current: float = 0.0
 
-        self._cf = ConfigParser("config.ini")
+        self._cf = ConfigParser()
+        self._cf.read("config.ini")
 
         self._az_limits: [float] = [-1, -1]
         self._el_limits: [float] = [-1, -1]
