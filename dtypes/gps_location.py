@@ -1,7 +1,7 @@
 
 class GPSLocation:
 
-    def __init__(self, latitude: str,lat_direction: chr, longitude: str, long_direction: chr ):
+    def __init__(self, latitude: str, lat_direction: chr, longitude: str, long_direction: chr):
         self._latitude = latitude
         self._lat_direction = lat_direction
         self._longitude = longitude
