@@ -22,13 +22,14 @@ class PedestalController:
         self._az_current: float = 0.0
         self._el_current: float = 0.0
 
+        self._cf = ConfigParser("config.ini")
+
         self._az_limits: [float] = [-1, -1]
         self._el_limits: [float] = [-1, -1]
         self._slew_rate_limit: float = 100000
         self.controller_init()
 
     def controller_init(self) -> None:
-        self._cf = ConfigParser("config.ini")
         self._az_limits = [self._cf["Constraints"]["MinAzimuth"], self._cf["Constraints"]["MaxAzimuth"]]
         self._el_limits = [self._cf["Constraints"]["MinElevation"], self._cf["Constraints"]["MaxElevation"]]
         self._slew_rate_limit = self._cf["Constraints"]["MaxSlewRate"]
@@ -52,20 +53,20 @@ class PedestalController:
     def set_az_limits(self, az_limit: [float]) -> None:
         """ Set azimuth limits for pedestal"""
         self._az_limits = az_limit
-        self._cf["Constraints"]["MinAzimuth"] = str(self._az_limits[0])  # write to config file
-        self._cf["Constraints"]["MinAzimuth"] = str(self._az_limits[1])  # write to config file
-        self.update_config_file()
+        self._cf["Constraints"]["MinAzimuth"] = str(self._az_limits[0])
+        self._cf["Constraints"]["MinAzimuth"] = str(self._az_limits[1])
+        self.update_config_file()  # write changes back to config file
 
 
     def set_el_limits(self, el_limits: [float]) -> None:
         """ Set elevation limits for pedestal"""
         self._el_limits = el_limits
-        self.update_config_file()
+        self.update_config_file()  # write changes back to config file
 
     def set_slew_rate_limit(self, limit: float) -> None:
         """ Set slew rate limits for pedestal"""
         self._slew_rate_limit = limit
-        self.update_config_file()
+        self.update_config_file()  # write changes back to config file
 
     """Getter methods:"""
     def get_location(self):
