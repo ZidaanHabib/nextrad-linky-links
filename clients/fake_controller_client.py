@@ -7,7 +7,7 @@ class FakeControllerClient(ControllerInterface):
     """Fake controller used for development and testing purposes"""
 
     def __init__(self):
-        super(FakeControllerClient, self).__init__()
+        pass
 
     def slew_positive_fixed(self, axis, slew_rate_preset):  #axis == 1: azimuth, 2: elevation
         print("< Slew positive fixed> ")
