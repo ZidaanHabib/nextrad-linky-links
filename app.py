@@ -48,7 +48,7 @@ def main():
     # Instantiate pedestal controller object:
     pc = PedestalController(FakeControllerClient(), FakeGPSClient())
     try:
-        client.connect(host="raspberrypizero.local", port=1883)
+        client.connect(host="10.42.0.39", port=1883)
     except Exception as e:
         print(e)
     #client.connect(host="mqtt.eclipseprojects.io", port=1883, keepalive=60, keepalive=60)
