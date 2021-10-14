@@ -1,7 +1,7 @@
 import serial
 
 
-class SerialInterface:
+class ControllerInterface:
 
     def __init__(self):
         self._serial_connection = serial.Serial(port='/dev/ttyUSB0',
@@ -20,3 +20,9 @@ class SerialInterface:
         self.send_command(cmd)
         response = self.receive_response()
         return response
+
+    def get_azimuth(self):
+        pass
+
+    def get_elevation(self):
+        pass
