@@ -1,15 +1,15 @@
 from clients.gps_client import GPSClient
 from dtypes.gps_location import GPSLocation
 from clients.hand_controller_serial_client import SynscanSerialClient
-from interfaces.controller_interface import SerialInterface
+from interfaces.controller_interface import ControllerInterface
 from configparser import ConfigParser
 import os
 
 
 class PedestalController:
 
-    def __init__(self, serial_client: SerialInterface, gps_client):
-        self._serial_client: SerialInterface = serial_client
+    def __init__(self, serial_client: ControllerInterface, gps_client):
+        self._serial_client: ControllerInterface = serial_client
         self._gps_client: GPSClient = gps_client
 
         self._location: GPSLocation = gps_client.get_location()
