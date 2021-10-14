@@ -1,8 +1,9 @@
 import serial
-from interfaces.serial_interface import SerialInterface
+from interfaces.controller_interface import ControllerInterface
 from time import sleep
 
-class SynscanSerialClient(SerialInterface):
+
+class SynscanSerialClient(ControllerInterface):
 
     def __init__(self):
         super(SynscanSerialClient, self).__init__()

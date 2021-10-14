@@ -1,7 +1,7 @@
 import serial
 
 
-class SerialInterface:
+class ControllerInterface:
 
     def __init__(self):
         self._serial_connection = serial.Serial(port='/dev/ttyUSB0',
