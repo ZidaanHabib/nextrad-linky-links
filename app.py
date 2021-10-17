@@ -10,7 +10,7 @@ def on_connect(client, userdata, flags, rc):
     if rc == 0:
         print("Connection OK.")
     else:
-        print("Connection failed with response code " + rc)
+        print("Connection failed with response code " + str(rc))
     client.subscribe("test")
 
 
@@ -48,7 +48,7 @@ def main():
     # Instantiate pedestal controller object:
     pc = PedestalController(FakeControllerClient(), FakeGPSClient())
     try:
-        client.connect(host="10.42.0.39", port=1883)
+        client.connect(host="localhost", port=1883)
     except Exception as e:
         print(e)
     #client.connect(host="mqtt.eclipseprojects.io", port=1883, keepalive=60, keepalive=60)
