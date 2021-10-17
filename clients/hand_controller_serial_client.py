@@ -26,8 +26,31 @@ class SynscanSerialClient(ControllerInterface):
         msg: str = "P" + chr(2) + axis_char + chr(37) + chr(slew_rate_preset) + chr(0) * 3
         self.send_command(msg)
 
-    #def slew_positive_variable(self, rate: float ):
+    def slew_positive_variable(self, axis: chr, rate: float ):  # rate is in arcseconds per sec
+        """Slew in positive direction at a specific rate in arcseconds per sec"""
+        track_rate_high: int = int((rate * 4) // 256)  # according to data sheet
+        track_rate_low: int = int((rate * 4) % 256)   # according to data sheet
 
+        axis_char = ""
+        if axis == 1:  # azimuth axis
+            axis_char = chr(16)
+        else:  # axis = 2  elevation axis
+            axis_char = chr(17)
+        msg: str = "P" + chr(3) + axis_char + chr(6) + chr(track_rate_high) + chr(track_rate_low) + chr(0) * 2
+        self.send_command(msg)
+
+    def slew_negative_variable(self, axis: chr, rate: float ):  # rate is in arcseconds per sec
+        """Slew in negative direction at a specific rate in arcseconds per sec"""
+        track_rate_high: int = int((rate * 4) // 256)  # according to data sheet
+        track_rate_low: int = int((rate * 4) % 256)   # according to data sheet
+
+        axis_char = ""
+        if axis == 1:  # azimuth axis
+            axis_char = chr(16)
+        else:  # axis = 2  elevation axis
+            axis_char = chr(17)
+        msg: str = "P" + chr(3) + axis_char + chr(7) + chr(track_rate_high) + chr(track_rate_low) + chr(0) * 2
+        self.send_command(msg)
 
     def stop_slew(self, axis):
         axis_char = ""
