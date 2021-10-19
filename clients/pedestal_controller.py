@@ -4,6 +4,7 @@ from clients.hand_controller_serial_client import SynscanSerialClient
 from interfaces.controller_interface import ControllerInterface
 from configparser import ConfigParser
 import os
+from helpers.controller_helper_functions import ControllerMath
 
 
 class PedestalController:
@@ -78,6 +79,8 @@ class PedestalController:
 
     def get_elevation(self):
         return self._el_current
+
+
 
 
 if __name__ == "__main__":
