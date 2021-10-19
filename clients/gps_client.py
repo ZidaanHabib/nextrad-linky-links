@@ -53,7 +53,22 @@ class GPSClient:
         long_direction = nmea_obj.lon_dir
         return GPSLocation(lat, lat_direction, long, long_direction)
 
+    @staticmethod
+    def format(lat: str, lat_dir: str, long: str, long_dir: str):
+        lat_degrees = float(lat[0:2])
+        lat_minutes = float(lat[2:])
+        long_degrees = float(long[0:3])
+        long_minutes = float(long[3:])
 
+        # 1' = 1/60 degrees:
+        lat_degrees += lat_minutes * (1 / 60)
+        long_degrees += long_minutes*(1/60)
+        if long_dir == "W":
+            long_degrees *= -1
+        if lat_dir == "S":
+            lat_degrees *= -1
+
+        return lat_degrees, long_degrees
 
     def continuous_read(self):
         """ Continously print raw NMEA messages to terminal """
@@ -66,5 +81,8 @@ class GPSClient:
 
 
 if __name__ == "__main__":
-    gps = GPSClient(9600 , 5)
-    print(gps.get_altitude())
+    lat = '3150.7825'
+    lat_Dir = "N"
+    long = '11711.9405'
+    long_dir = "W"
+    print(GPSClient.format(lat, lat_Dir, long, long_dir))
