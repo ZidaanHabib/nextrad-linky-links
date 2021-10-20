@@ -32,3 +32,12 @@ class FakeControllerClient(ControllerInterface):
     def get_elevation(self):
         el = random.uniform(180, 360)
         return el
+
+    def communicate(self, cmd: str):
+        pass
+
+    def receive_response(self):
+        pass
+
+    def send_command(self, cmd: str):
+        pass
