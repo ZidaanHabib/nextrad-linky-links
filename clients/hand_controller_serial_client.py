@@ -80,18 +80,18 @@ class SynscanSerialClient(ControllerInterface):
     def get_azimuth(self) -> float:
         response = self.communicate("z")
         az_string = response.split(",")[0]  # get the azimuth portion of controller response
-        az_string = az_string[0:-2]  #ignore last 2 chars as per datasheet
+        az_string = az_string[0:-2] #ignore last 2 chars as per datasheet
         az = float.fromhex(az_string)  # convert from hex string to decimal number
-        az = (az/16777216)*360  # convert to degrees
+        az = round((az/16777216)*360, 2)  # convert to degrees
+
         return az
 
     def get_elevation(self):
-        self.send_command("z")
-        response = self.receive_response()
+        response = self.communicate("z")
         el_string = response.split(",")[1]  # get the azimuth portion of controller response
-        el_string = el_string[0:-2]  # ignore last 2 chars as per datasheet
+        el_string = el_string[0:-3]  # ignore last 2 chars as per datasheet as well as '#'
         el = float.fromhex(el_string)  # convert from hex string to decimal number
-        el = (el / 16777216) * 360  # convert to degrees
+        el = round((el / 16777216) * 360,2)  # convert to degrees
         return el
 
 if __name__ == "__main__":
