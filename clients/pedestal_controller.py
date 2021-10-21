@@ -9,8 +9,8 @@ from helpers.controller_helper_functions import ControllerMath
 
 class PedestalController:
 
-    def __init__(self, serial_client: ControllerInterface, gps_client):
-        self._serial_client: ControllerInterface = serial_client
+    def __init__(self, serial_client: SynscanSerialClient, gps_client): #TODO change tye to ControllerInterface or more accurately, IPedestalRemote
+        self._serial_client: SynscanSerialClient = serial_client
         self._gps_client: GPSClient = gps_client
 
         self._location: GPSLocation = gps_client.get_location()
@@ -72,6 +72,9 @@ class PedestalController:
         """ Set slew rate limits for pedestal"""
         self._slew_rate_limit = limit
         self.update_config_file()  # write changes back to config file
+
+    def set_moving(self, status: bool):
+        self._moving = status
 
     """Getter methods:"""
     def get_location(self):
