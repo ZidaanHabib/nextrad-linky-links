@@ -20,15 +20,15 @@ class IPedestalRemote(ABC):
         pass
 
     @abstractmethod
-    def slew_cw(self):
+    def slew_posiive_fixed(self, axis):
         pass
 
     @abstractmethod
-    def slew_ccw(self):
+    def slew_negative_fixed(self, axis):
         pass
 
     @abstractmethod
-    def stop_slew(self):
+    def stop_slew(self, axis):
         pass
 
     @abstractmethod
