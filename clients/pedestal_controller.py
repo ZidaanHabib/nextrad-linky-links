@@ -86,6 +86,9 @@ class PedestalController:
     def is_moving(self) -> bool:
         return self._moving
 
+    def get_slew_preset(self):
+        return self._slew_rate_preset
+
 if __name__ == "__main__":
     print("hello")
     print(os.getcwd())
