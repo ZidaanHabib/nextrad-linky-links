@@ -29,6 +29,8 @@ class PedestalController:
         self._az_limits: [float] = [-1, -1]
         self._el_limits: [float] = [-1, -1]
         self._slew_rate_limit: float = 100000
+
+        self._moving = False
         self.controller_init()
 
     def controller_init(self) -> None:
@@ -80,8 +82,8 @@ class PedestalController:
     def get_elevation(self):
         return self._el_current
 
-
-
+    def is_moving(self) -> bool:
+        return self._moving
 
 if __name__ == "__main__":
     print("hello")
