@@ -88,6 +88,10 @@ class AZEQ6Remote(): #TODO add IPedestalRemote inheritance
         el = round((el / 16777216) * 360, 2)  # convert to degrees
         return el
 
+    def is_slew_az_el(self) -> bool:
+        response = self._serial_client.communicate("L")
+        moving: bool = int(response[0:-1])
+        return moving
 
 
 if __name__ == "__main__":
@@ -96,12 +100,15 @@ if __name__ == "__main__":
     pc = PedestalController(SynscanSerialClient(), FakeGPSClient())
     az = AZEQ6Remote(pc, sc)
 
-    print("Azimuth: " + str(az.get_azimuth()))
-    print("Elevation: " + str(az.get_elevation()))
-    #az.slew_to_az_el(1,1)
-    #az.slew_positive_fixed(1)
-    #time.sleep(1)
-    #az.stop_slew(1)
+    #print("Azimuth: " + str(az.get_azimuth()))
+    #print("Elevation: " + str(az.get_elevation()))
+    #az.slew_to_az_el(10,10)
+    #print(az.is_moving())
+    az.slew_positive_fixed(1)
+    print(az.is_slew_az_el())
+    time.sleep(1)
+    az.stop_slew(1)
+    #print(az.is_moving())
     #print(sc.get_azimuth())
     #time.sleep(5)
     #az._serial_client.send_command("B12AB,12AB")
