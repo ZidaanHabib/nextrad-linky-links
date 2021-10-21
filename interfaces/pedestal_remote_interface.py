@@ -1,40 +1,40 @@
-from abc import ABC, abstractclassmethod
+from abc import ABC, abstractmethod
 
 
 class IPedestalRemote(ABC):
 
-    @abstractclassmethod
-    def slew_to_loc():
+    @abstractmethod
+    def slew_to_loc(self):
         pass
 
-    @abstractclassmethod
-    def slew_to_az_el():
+    @abstractmethod
+    def slew_to_az_el(self):
         pass
 
-    @abstractclassmethod
-    def sweep_mode_on():
+    @abstractmethod
+    def sweep_mode_on(self):
         pass
 
-    @abstractclassmethod
-    def sweep_mode_off():
+    @abstractmethod
+    def sweep_mode_off(self):
         pass
 
-    @abstractclassmethod
-    def slew_cw():
+    @abstractmethod
+    def slew_cw(self):
         pass
 
-    @abstractclassmethod
-    def slew_ccw():
+    @abstractmethod
+    def slew_ccw(self):
         pass
 
-    @abstractclassmethod
-    def stop_slew():
+    @abstractmethod
+    def stop_slew(self):
         pass
 
-    @abstractclassmethod
-    def set_slew_speed():
+    @abstractmethod
+    def set_slew_speed(self):
         pass
 
-    @abstractclassmethod
-    def set_slew_preset():
+    @abstractmethod
+    def set_slew_preset(self):
         pass
