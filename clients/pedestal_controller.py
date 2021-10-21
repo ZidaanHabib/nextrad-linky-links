@@ -30,7 +30,8 @@ class PedestalController:
         self._el_limits: [float] = [-1, -1]
         self._slew_rate_limit: float = 100000
 
-        self._moving = False
+        self._moving: bool = False
+        self._slew_rate_preset: int = 9
         self.controller_init()
 
     def controller_init(self) -> None:
