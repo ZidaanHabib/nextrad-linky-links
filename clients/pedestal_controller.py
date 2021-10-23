@@ -9,7 +9,7 @@ from helpers.controller_helper_functions import ControllerMath
 
 class PedestalController:
 
-    def __init__(self, serial_client: SynscanSerialClient, gps_client): #TODO change tye to ControllerInterface or more accurately, IPedestalRemote
+    def __init__(self, serial_client: ControllerInterface, gps_client): #TODO change tye to ControllerInterface or more accurately, IPedestalRemote
         self._serial_client: SynscanSerialClient = serial_client
         self._gps_client: GPSClient = gps_client
 
@@ -85,6 +85,9 @@ class PedestalController:
 
     def get_elevation(self):
         return self._el_current
+
+    def get_azimuth_limits(self):
+        return self._az_limits
 
     def is_moving(self) -> bool:
         return self._moving
