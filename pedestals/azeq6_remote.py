@@ -4,14 +4,19 @@ from clients.pedestal_controller import PedestalController
 #testing:
 from clients.hand_controller_serial_client import SynscanSerialClient
 from clients.fake_gps_client import FakeGPSClient
+from clients.fake_controller_client import FakeControllerClient
 import time
 import os
+from threading import Thread
 
 class AZEQ6Remote(): #TODO add IPedestalRemote inheritance
+
 
     def __init__(self, pc: PedestalController, sc: ControllerInterface):
         self._pedestal_controller = pc
         self._serial_client = sc
+
+
 
     def slew_cw(self):
         pass
@@ -93,22 +98,65 @@ class AZEQ6Remote(): #TODO add IPedestalRemote inheritance
         moving: bool = int(response[0:-1])
         return moving
 
+    def sweep_thread(self, stop_sweep):
+        """ Method to continously sweep pedestal between the 2 azimuth limits"""
+        elevation = self._pedestal_controller.get_elevation()
+        #  Stop pedestal if already moving:
+        """self.stop_slew(1)
+        self.stop_slew(2)
+        #  make this a threaded function:
+        sweep_thread = Thread(target=self.sweep_on)
+        Thread.daemon = True
+        Thread.start()
+        while not stop_sweep:
+            while self.is_slew_az_el():
+                pass   # block if already moving
+            self.slew_to_az_el(self._pedestal_controller.get_azimuth_limits()[0], elevation)  # when stopped slewing, go to min azimuth
+            while self.is_slew_az_el():
+                pass  # block if already moving
+            self.slew_to_az_el(self._pedestal_controller.get_azimuth_limits()[1],elevation )  # when stopped slewing, go to min azimuth"""
+
+        while True:
+            print("hello\n")
+            if stop_sweep:
+                break
+
+    def sweep_off(self):
+        global stop_sweep
+        stop_sweep = True  # stop sweep thread
+        #self.stop_slew(1)
+        #self.stop_slew(2)
+
+    def sweep_on(self):
+        global stop_sweep
+        stop_sweep = False
+        sweep_thread = Thread(target=self.sweep_thread, args=[stop_sweep])
+        sweep_thread.daemon = True
+        sweep_thread.start()
+
 
 if __name__ == "__main__":
+
     os.chdir("../")
-    sc = SynscanSerialClient()
-    pc = PedestalController(SynscanSerialClient(), FakeGPSClient())
+    sc = FakeControllerClient()
+    pc = PedestalController(sc, FakeGPSClient())
     az = AZEQ6Remote(pc, sc)
 
     #print("Azimuth: " + str(az.get_azimuth()))
     #print("Elevation: " + str(az.get_elevation()))
     #az.slew_to_az_el(10,10)
     #print(az.is_moving())
-    az.slew_positive_fixed(1)
-    print(az.is_slew_az_el())
-    time.sleep(1)
-    az.stop_slew(1)
+    #az.slew_positive_fixed(1)
+    #print(az.is_slew_az_el())
+    #time.sleep(1)
+    #az.stop_slew(1)
     #print(az.is_moving())
     #print(sc.get_azimuth())
     #time.sleep(5)
     #az._serial_client.send_command("B12AB,12AB")
+    '''sweep_thread = Thread(target=az.sweep_on)
+    sweep_thread.daemon = True
+    sweep_thread.start()'''
+    az.sweep_on()
+    time.sleep(2)
+    az.sweep_off()
