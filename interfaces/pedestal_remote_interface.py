@@ -20,7 +20,7 @@ class IPedestalRemote(ABC):
         pass
 
     @abstractmethod
-    def slew_posiive_fixed(self, axis):
+    def slew_positive_fixed(self, axis):
         pass
 
     @abstractmethod
@@ -37,4 +37,12 @@ class IPedestalRemote(ABC):
 
     @abstractmethod
     def set_slew_preset(self):
+        pass
+
+    @abstractmethod
+    def get_azimuth(self):
+        pass
+
+    @abstractmethod
+    def get_elevation(self):
         pass
