@@ -19,8 +19,12 @@ class AZEQ6Remote(): #TODO add IPedestalRemote inheritance
 
     def calibrate(self):
         """ Set current azimuth and elevation to be the 0,0 point"""
-        self._serial_client.send_command("P" + chr(4) + chr(16) + chr(4) + chr(0) + chr(0) + chr(0) + chr(0))
-        self._serial_client.send_command("P" + chr(4) + chr(17) + chr(4) + chr(0) + chr(0) + chr(0) + chr(0))
+        self._serial_client.send_command("P" + chr(4) + chr(16) +
+                                         chr(4) + chr(0) + chr(0) +
+                                         chr(0) + chr(0))  # manufacturer command to set current azimuth as 0
+        self._serial_client.send_command("P" + chr(4) + chr(17) +
+                                         chr(4) + chr(0) + chr(0) +
+                                         chr(0) + chr(0))  # manufacturer command to set current elevation as 0
 
     def slew_cw(self):
         pass
@@ -28,11 +32,21 @@ class AZEQ6Remote(): #TODO add IPedestalRemote inheritance
     def slew_ccw(self):
         pass
 
-    def slew_to_location(self, latitude, longitude, tgt_altitude):
-        src_altitude = self._pedestal_controller.get_altitude()
-        elevation_diff = ControllerMath.determine_elevation_difference(src_altitude, tgt_altitude)
-        azimuth_diff = ControllerMath.determine_azimuth_difference()
+    def slew_to_location(self, target_lat, target_long, target_altitude):
+        src_lat = self._pedestal_controller.get_location().get_latitude()
+        src_long = self._pedestal_controller.get_location().get_longitude()
 
+        distance = ControllerMath.haversine(src_lat, src_long, target_lat, target_long)   # calculate distance between
+                                                                                         # locations
+        src_altitude = self._pedestal_controller.get_altitude()
+        elevation_diff = ControllerMath.determine_elevation_difference(src_altitude, target_altitude)
+        azimuth_diff = ControllerMath.determine_azimuth_difference(src_lat, src_long, target_lat, target_long)
+
+        #  now we need to account for where the pedestal is already pointing:
+        azimuth_final = 360 - (azimuth_diff + self._pedestal_controller.get_tn_offset())
+        elevation_final = 360 - (elevation_diff + self._pedestal_controller.get_horizontal_offset())
+
+        self.slew_to_az_el(round(azimuth_final), round(elevation_final))  # move
 
     def slew_positive_fixed(self, axis):  #axis == 1: azimuth, 2: elevation
         if self._pedestal_controller.is_moving():  # make sure pedestal not already moving
@@ -105,6 +119,8 @@ class AZEQ6Remote(): #TODO add IPedestalRemote inheritance
         el_string += "00"  # append 2 trailing zeros because 24 bit number
         el = float.fromhex(el_string)  # convert from hex string to decimal number
         el = round((el / 16777216) * 360, 2)  # convert to degrees
+        if el >= 180:
+            el = -1*(360 - el)  # use negative degrees instead
         return el
 
     def is_slew_az_el(self) -> bool:
