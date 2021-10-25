@@ -1,12 +1,14 @@
 import serial
 from interfaces.controller_interface import ControllerInterface
 from time import sleep
+from threading import Lock
 
 
 class SynscanSerialClient(ControllerInterface):
 
     def __init__(self):
         super(SynscanSerialClient, self).__init__()
+        self.lock = Lock()
 
     def slew_positive_fixed(self, axis, slew_rate_preset):  #axis == 1: azimuth, 2: elevation
         axis_char = ""
@@ -66,7 +68,9 @@ class SynscanSerialClient(ControllerInterface):
         self.send_command(msg)
 
     def send_command(self, cmd: str):
+        self.lock.acquire()
         self._serial_connection.write(cmd.encode())
+        self.lock.release()
 
     def receive_response(self):
         response = self._serial_connection.read_until(expected=b'#')  # controller response has # ending char
