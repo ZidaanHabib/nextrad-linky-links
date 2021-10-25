@@ -16,7 +16,10 @@ class AZEQ6Remote(): #TODO add IPedestalRemote inheritance
         self._pedestal_controller = pc
         self._serial_client = sc
 
-
+    def calibrate(self):
+        """ Set current azimuth and elevation to be the 0,0 point"""
+        self._serial_client.send_command("P" + chr(4) + chr(16) + chr(4) + chr(0) + chr(0) + chr(0) + chr(0))
+        self._serial_client.send_command("P" + chr(4) + chr(17) + chr(4) + chr(0) + chr(0) + chr(0) + chr(0))
 
     def slew_cw(self):
         pass
@@ -60,6 +63,12 @@ class AZEQ6Remote(): #TODO add IPedestalRemote inheritance
         self._pedestal_controller.set_moving(False)  #update moving status to false
 
     def slew_to_az_el(self, azimuth: float, elevation: float):
+        if azimuth < 0:
+            while azimuth < 0:
+                azimuth += 360
+        if elevation < 0:
+            while elevation < 0:
+                elevation += 360
         hex_azimuth = hex(round(azimuth*(16777216/360)))[2:]  # from datasheet, also ignore '0x'
         hex_elevation = hex(round(elevation * (16777216 / 360)))[2:]
         hex_elevation =  hex_elevation.upper()  # convert to uppercase
@@ -71,7 +80,6 @@ class AZEQ6Remote(): #TODO add IPedestalRemote inheritance
 
         cmd: str = "b" + hex_azimuth + "00" + "," + hex_elevation + "00"
         self._serial_client.send_command(cmd)
-        print(cmd)
 
 
     def get_azimuth(self) -> float:
@@ -95,37 +103,55 @@ class AZEQ6Remote(): #TODO add IPedestalRemote inheritance
 
     def is_slew_az_el(self) -> bool:
         response = self._serial_client.communicate("L")
-        moving: bool = int(response[0:-1])
+        #moving: bool = int(response[0:-1])
+        response = response[0:-1]
+        print("response: " + response)
+        moving: bool = False
+        if response == "0":
+            moving = False
+        elif response == "1":
+            moving = True
+
         return moving
 
     def sweep_thread(self, stop_sweep):
         """ Method to continously sweep pedestal between the 2 azimuth limits"""
         elevation = self._pedestal_controller.get_elevation()
+        azimuth = self._pedestal_controller.get_azimuth()
         #  Stop pedestal if already moving:
-        """self.stop_slew(1)
+        self.stop_slew(1)
         self.stop_slew(2)
         #  make this a threaded function:
-        sweep_thread = Thread(target=self.sweep_on)
-        Thread.daemon = True
-        Thread.start()
-        while not stop_sweep:
+
+        """while not stop_sweep:
             while self.is_slew_az_el():
                 pass   # block if already moving
+                print("blocking")
             self.slew_to_az_el(self._pedestal_controller.get_azimuth_limits()[0], elevation)  # when stopped slewing, go to min azimuth
+            print("slewing")
             while self.is_slew_az_el():
                 pass  # block if already moving
-            self.slew_to_az_el(self._pedestal_controller.get_azimuth_limits()[1],elevation )  # when stopped slewing, go to min azimuth"""
+            self.slew_to_az_el(self._pedestal_controller.get_azimuth_limits()[1],elevation )  # when stopped slewing, go to min azimuth
+        print("thread exiting")"""
+        az_min = self._pedestal_controller.get_azimuth_limits()[0]
+        az_max = self._pedestal_controller.get_azimuth_limits()[1]
+        delay = (az_max - az_min) / 3.1  # goto speed is approx 3 deg/sec
+        if azimuth not in [az_min, az_max]: #if current pos not in range, go to the max az to start sweep
+            self.slew_to_az_el(az_max, elevation)
+        while not stop_sweep:
+            self.slew_to_az_el(self._pedestal_controller.get_azimuth_limits()[0], elevation)
+            time.sleep(delay)
+            self.slew_to_az_el(self._pedestal_controller.get_azimuth_limits()[1], elevation)
 
-        while True:
-            print("hello\n")
-            if stop_sweep:
-                break
+
+
 
     def sweep_off(self):
         global stop_sweep
         stop_sweep = True  # stop sweep thread
-        #self.stop_slew(1)
-        #self.stop_slew(2)
+        self.stop_slew(1)
+        self.stop_slew(2)
+
 
     def sweep_on(self):
         global stop_sweep
@@ -134,17 +160,31 @@ class AZEQ6Remote(): #TODO add IPedestalRemote inheritance
         sweep_thread.daemon = True
         sweep_thread.start()
 
+    def sweep_test(self):
+        elevation = self._pedestal_controller.get_elevation()
+        az_min = self._pedestal_controller.get_azimuth_limits()[0]
+        az_max = self._pedestal_controller.get_azimuth_limits()[1]
+        delay = (az_max - az_min)/3.1  # goto speed is approx 3 deg/sec
+        try:
+            while True:
+                self.slew_to_az_el(self._pedestal_controller.get_azimuth_limits()[0], elevation)
+                time.sleep(delay)
+                self.slew_to_az_el(self._pedestal_controller.get_azimuth_limits()[1], elevation)
+        except KeyboardInterrupt:
+            pass
+
 
 if __name__ == "__main__":
 
     os.chdir("../")
-    sc = FakeControllerClient()
+    sc = SynscanSerialClient()
     pc = PedestalController(sc, FakeGPSClient())
     az = AZEQ6Remote(pc, sc)
-
-    #print("Azimuth: " + str(az.get_azimuth()))
-    #print("Elevation: " + str(az.get_elevation()))
-    #az.slew_to_az_el(10,10)
+   #pc.set_az_limits([0,30])
+    #print(pc.get_azimuth_limits())
+    print("Azimuth: " + str(az.get_azimuth()))
+    print("Elevation: " + str(az.get_elevation()))
+    #)
     #print(az.is_moving())
     #az.slew_positive_fixed(1)
     #print(az.is_slew_az_el())
@@ -154,9 +194,7 @@ if __name__ == "__main__":
     #print(sc.get_azimuth())
     #time.sleep(5)
     #az._serial_client.send_command("B12AB,12AB")
-    '''sweep_thread = Thread(target=az.sweep_on)
-    sweep_thread.daemon = True
-    sweep_thread.start()'''
-    az.sweep_on()
-    time.sleep(2)
-    az.sweep_off()
+    """az.sweep_on()
+    time.sleep(30)
+    az.sweep_off()"""
+    az.slew_to_az_el(180,0)
