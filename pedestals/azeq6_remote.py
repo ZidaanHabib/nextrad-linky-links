@@ -1,6 +1,7 @@
 from interfaces.pedestal_remote_interface import IPedestalRemote
 from interfaces.controller_interface import ControllerInterface
 from clients.pedestal_controller import PedestalController
+from helpers.controller_helper_functions import ControllerMath
 #testing:
 from clients.hand_controller_serial_client import SynscanSerialClient
 from clients.fake_gps_client import FakeGPSClient
@@ -26,6 +27,11 @@ class AZEQ6Remote(): #TODO add IPedestalRemote inheritance
 
     def slew_ccw(self):
         pass
+
+    def slew_to_location(self, latitude, longitude, tgt_altitude):
+        src_altitude = self._pedestal_controller.get_altitude()
+        elevation_diff = ControllerMath.determine_elevation_difference(src_altitude, tgt_altitude)
+        azimuth_diff = ControllerMath.determine_azimuth_difference()
 
 
     def slew_positive_fixed(self, axis):  #axis == 1: azimuth, 2: elevation
