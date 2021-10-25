@@ -81,6 +81,10 @@ class PedestalController:
         return self._location.__repr__()
 
     def get_azimuth(self):
+        return self._altitude
+
+
+    def get_altitude(self):
         return self._az_current
 
     def get_elevation(self):
