@@ -35,11 +35,11 @@ class PedestalController:
         self.controller_init()
 
     def controller_init(self) -> None:
-        self._az_limits = [self._cf["Constraints"]["MinAzimuth"], self._cf["Constraints"]["MaxAzimuth"]]
-        self._el_limits = [self._cf["Constraints"]["MinElevation"], self._cf["Constraints"]["MaxElevation"]]
-        self._slew_rate_limit = self._cf["Constraints"]["MaxSlewRate"]
-        self._az_offset: float = self._serial_client.get_azimuth()
-        self._el_offset: float = self._serial_client.get_elevation()
+        self._az_limits = [float(self._cf["Constraints"]["MinAzimuth"]), float(self._cf["Constraints"]["MaxAzimuth"])]
+        self._el_limits = [float(self._cf["Constraints"]["MinElevation"]), float(self._cf["Constraints"]["MaxElevation"])]
+        self._slew_rate_limit = float(self._cf["Constraints"]["MaxSlewRate"])
+        self._az_offset: float = float(self._serial_client.get_azimuth())
+        self._el_offset: float = float(self._serial_client.get_elevation())
 
     def update_config_file(self) -> None:
         """ Update config.ini file """
@@ -58,15 +58,15 @@ class PedestalController:
     def set_az_limits(self, az_limit: [float]) -> None:
         """ Set azimuth limits for pedestal"""
         self._az_limits = az_limit
-        self._cf["Constraints"]["MinAzimuth"] = str(self._az_limits[0])
-        self._cf["Constraints"]["MinAzimuth"] = str(self._az_limits[1])
-        self.update_config_file()  # write changes back to config file
+        self._cf["Constraints"]["MinAzimuth"] = str(az_limit[0])
+        self._cf["Constraints"]["MinAzimuth"] = str(az_limit[1])
+        #self.update_config_file()  # write changes back to config file
 
 
     def set_el_limits(self, el_limits: [float]) -> None:
         """ Set elevation limits for pedestal"""
         self._el_limits = el_limits
-        self.update_config_file()  # write changes back to config file
+        #self.update_config_file()  # write changes back to config file
 
     def set_slew_rate_limit(self, limit: float) -> None:
         """ Set slew rate limits for pedestal"""
