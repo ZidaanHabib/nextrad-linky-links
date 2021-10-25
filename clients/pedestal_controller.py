@@ -40,6 +40,9 @@ class PedestalController:
         self._slew_rate_limit = float(self._cf["Constraints"]["MaxSlewRate"])
         self._az_offset: float = float(self._serial_client.get_azimuth())
         self._el_offset: float = float(self._serial_client.get_elevation())
+        self._true_north_offset =  int(self._cf["Navigation"]["True_North_Offset"])
+        self._horizontal_offset = float(self._cf["Navigation"]["Horizontal_Offset"])
+
 
     def update_config_file(self) -> None:
         """ Update config.ini file """
@@ -77,8 +80,13 @@ class PedestalController:
         self._moving = status
 
     """Getter methods:"""
-    def get_location(self):
+    def get_location_str(self):
+        """ Method to return string representation of location"""
         return self._location.__repr__()
+
+    def get_location(self):
+        """Return instance location object """
+        return self._location
 
     def get_azimuth(self):
         return self._altitude
@@ -99,6 +107,12 @@ class PedestalController:
     def get_slew_preset(self):
         return self._slew_rate_preset
 
+    def get_tn_offset(self):
+        """ MEthod to return true north offset"""
+        return self._true_north_offset
+
+    def get_horizontal_offset(self):
+        return self._horizontal_offset
 if __name__ == "__main__":
     print("hello")
     print(os.getcwd())
