@@ -88,11 +88,11 @@ class PedestalController:
         """Return instance location object """
         return self._location
 
-    def get_azimuth(self):
+    def get_altitude(self):
         return self._altitude
 
 
-    def get_altitude(self):
+    def get_azimuth(self):
         return self._az_current
 
     def get_elevation(self):
