@@ -33,15 +33,16 @@ class ControllerMath:
 
         azimuth = atan2((cos(target_lat)*sin(delta_long)),(cos(source_lat)*sin(target_lat) - sin(source_lat)*cos(target_lat)*cos(delta_long)))
         azimuth_degrees = degrees(azimuth) # add 180 degrees to reverse from source to dest
-        return azimuth_degrees
+        return round(azimuth_degrees,2)
 
     @staticmethod
     def determine_elevation_difference(source_alt: float, target_alt: float, distance):
         delta_height = source_alt - target_alt
         elevation_degrees = degrees(atan(delta_height/distance))
-        return elevation_degrees
+        return round(elevation_degrees,2)
 
 
 
 if __name__ == "__main__":
     print(ControllerMath.determine_azimuth_difference(40.4970900,-74.9159100, 41.68112, -75.83867))
+    print(ControllerMath.determine_elevation_difference(88,15, 973))
