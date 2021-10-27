@@ -9,7 +9,7 @@ class IPedestalRemote(ABC):
 
     """Slewing methods:"""
     @abstractmethod
-    def slew_to_location(self, lat, long):
+    def slew_to_location(self, lat, long, altitude):
         pass
 
     @abstractmethod
@@ -17,11 +17,11 @@ class IPedestalRemote(ABC):
         pass
 
     @abstractmethod
-    def slew_positive_preset(self):
+    def slew_positive_preset(self, axis):
         pass
 
     @abstractmethod
-    def slew_negative_preset(self):
+    def slew_negative_preset(self, axis):
         pass
 
     @abstractmethod
@@ -37,11 +37,11 @@ class IPedestalRemote(ABC):
         pass
 
     @abstractmethod
-    def slew_positive_specific(self, axis):
+    def slew_positive_specific(self, axis, rate):
         pass
 
     @abstractmethod
-    def slew_negative_specific(self, axis):
+    def slew_negative_specific(self, axis, rate):
         pass
 
     @abstractmethod
