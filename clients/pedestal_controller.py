@@ -1,7 +1,7 @@
 from clients.gps_client import GPSClient
 from dtypes.gps_location import GPSLocation
 from clients.hand_controller_serial_client import SynscanSerialClient
-from interfaces.controller_interface import ControllerInterface
+from interfaces.connection_interface import ControllerInterface
 from configparser import ConfigParser
 import os
 from helpers.controller_helper_functions import ControllerMath

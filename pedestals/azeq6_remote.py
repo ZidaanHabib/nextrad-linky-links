@@ -1,5 +1,5 @@
 from interfaces.pedestal_remote_interface import IPedestalRemote
-from interfaces.controller_interface import ControllerInterface
+from interfaces.connection_interface import ControllerInterface
 from clients.pedestal_controller import PedestalController
 from helpers.controller_helper_functions import ControllerMath
 #testing:
@@ -9,113 +9,90 @@ from clients.fake_controller_client import FakeControllerClient
 import time
 import os
 from threading import Thread
+from clients.hand_controller_serial_client import SynscanSerialClient
+from dtypes.gps_location import GPSLocation
+from configparser import ConfigParser
 
-class AZEQ6Remote(): #TODO add IPedestalRemote inheritance
 
+class AZEQ6Remote: #TODO add IPedestalRemote inheritance
 
-    def __init__(self, pc: PedestalController, sc: ControllerInterface):
-        self._pedestal_controller = pc
+    def __init__(self, sc: SynscanSerialClient, gps_client):
+        #  client members:
         self._serial_client = sc
+        self._gps_client = gps_client
+
+        self._cf = ConfigParser()  # means of reading from config file
+        self._cf.read("config.ini")
+
+        #  geographic information:
+        self._az_offset: float = float(self._cf["Navigation"]["True_North_Offset"])
+        self._el_offset: float = float(self._cf["Navigation"]["Horizontal_Offset"])
+        self._location: GPSLocation = gps_client.get_location()
+        self._altitude: float = gps_client.get_altitude()
+
+        self._az_limits: [float] = [float(self._cf["Constraints"]["MinAzimuth"]), float(self._cf["Constraints"]["MaxAzimuth"])]
+        self._el_limits: [float] = [float(self._cf["Constraints"]["MinElevation"]), float(self._cf["Constraints"]["MaxElevation"])]
+        self._slew_rate_limit: float = float(self._cf["Constraints"]["MaxSlewRate"])
+
+        self._slew_rate = 150.0  #arcsec/sec
+        self._slew_preset = 9
+
+        self._moving = False
 
     def calibrate(self):
         """ Set current azimuth and elevation to be the 0,0 point"""
-        self._serial_client.send_command("P" + chr(4) + chr(16) +
-                                         chr(4) + chr(0) + chr(0) +
-                                         chr(0) + chr(0))  # manufacturer command to set current azimuth as 0
-        self._serial_client.send_command("P" + chr(4) + chr(17) +
-                                         chr(4) + chr(0) + chr(0) +
-                                         chr(0) + chr(0))  # manufacturer command to set current elevation as 0
-
-    def slew_cw(self):
-        pass
-
-    def slew_ccw(self):
-        pass
+        self._serial_client.calibrate_command()
 
     def slew_to_location(self, target_lat, target_long, target_altitude):
         """ Method to slew to a target location entered in latitude and longitude"""
-        src_lat = self._pedestal_controller.get_location().get_latitude()
-        src_long = self._pedestal_controller.get_location().get_longitude()
+        src_lat = self._location.get_latitude()
+        src_long = self._location.get_longitude()
 
         distance = ControllerMath.haversine(src_lat, src_long, target_lat, target_long)   # calculate distance between
                                                                                          # locations
-        src_altitude = self._pedestal_controller.get_altitude()
-        elevation_diff = ControllerMath.determine_elevation_difference(src_altitude, target_altitude)
+        src_altitude = self._altitude
+        elevation_diff = ControllerMath.determine_elevation_difference(src_altitude, target_altitude, distance)
         azimuth_diff = ControllerMath.determine_azimuth_difference(src_lat, src_long, target_lat, target_long)
 
         #  now we need to account for where the pedestal is already pointing:
-        azimuth_final = 360 - (azimuth_diff + self._pedestal_controller.get_tn_offset())
-        elevation_final = 360 - (elevation_diff + self._pedestal_controller.get_horizontal_offset())
+        azimuth_final = 360 - (azimuth_diff + self._az_offset)
+        elevation_final = 360 - (elevation_diff + self._el_offset)
 
         self.slew_to_az_el(round(azimuth_final), round(elevation_final))  # move
 
-    def slew_positive_fixed(self, axis):  #axis == 1: azimuth, 2: elevation
-        if self._pedestal_controller.is_moving():  # make sure pedestal not already moving
-            self.stop_slew(axis)  # stop pedestal if already moving
-        self._pedestal_controller.set_moving(True)
-        axis_char = ""
-        if axis == 1:
-            axis_char = chr(16)
-        else: # axis = 2
-            axis_char = chr(17)
-        msg: str = "P" + chr(2) + axis_char + chr(36) + chr(self._pedestal_controller.get_slew_preset()) + chr(0)*3
-        self._serial_client.communicate(msg)
-
     def slew_positive_specific(self, axis: int, rate: float):
-        if self._pedestal_controller.is_moving():  # make sure pedestal not already moving
+        if self.is_moving():  # make sure pedestal not already moving
             self.stop_slew(axis)  # stop pedestal if already moving
-        self._pedestal_controller.set_moving(True)
+        self.set_moving(True)
 
-        slew_rate = rate if rate <= self._pedestal_controller._slew_rate_limit else self._pedestal_controller._slew_rate_limit
-        #  separate slew rate into high and low byte according to datasheet:
-        #TODO move the below cmd string creation into the hand controller client
-        slew_rate_whole = int((slew_rate * 4) // 256)
-        slew_rate_rem = int((slew_rate * 4) % 256)
+        slew_rate = rate if rate <= self._slew_rate_limit else self._slew_rate_limit
 
-        azimuth_diff = abs(self.get_azimuth() - self._pedestal_controller._az_limits[1])
+        azimuth_diff = abs(self.get_azimuth() - self._az_limits[1])
         if azimuth_diff > 180:
             azimuth_diff = 360 - azimuth_diff
-        elevation_diff = abs(self.get_elevation() - self._pedestal_controller._el_limits[1])
+
+        elevation_diff = abs(self.get_elevation() - self._el_limits[1])
         if elevation_diff > 180:
             elevation_diff = 360 - elevation_diff
-        #  1 arcsec/sec = 0.000277778  degrees/sec
 
-        axis_char = ""
-        wait = 0
-        if axis == 1:  # azimuth axis
-            axis_char = chr(16)
-            wait = azimuth_diff/(slew_rate * 0.000277778)
-        else:  # axis = 2  , elevation axis
-            axis_char = chr(17)
-            wait = elevation_diff / (slew_rate * 0.000277778)
-        cmd = "P" + chr(3) + axis_char + chr(6) + chr(slew_rate_whole) + chr(slew_rate_rem) + chr(0)*2
-        time.sleep(wait)
-        self.stop_slew(axis)
+        self._serial_client.slew_positive_specific(axis, slew_rate, azimuth_diff, elevation_diff)
 
-
-
+    def slew_positive_fixed(self, axis):  #axis == 1: azimuth, 2: elevation
+        if self._moving:  # make sure pedestal not already moving
+            self.stop_slew(axis)  # stop pedestal if already moving
+        self.set_moving(True)
+        self._serial_client.slew_positive_fixed(axis, self._slew_preset)
 
     def slew_negative_fixed(self, axis: int):
-        if self._pedestal_controller.is_moving():  # make sure pedestal not already moving
+        if self.is_moving():  # make sure pedestal not already moving
             self.stop_slew(axis)  # stop pedestal if already moving
-        self._pedestal_controller.set_moving(True)
-        axis_char = ""
-        if axis == 1:
-            axis_char = chr(16)
-        else:  # axis = 2
-            axis_char = chr(17)
-        msg: str = "P" + chr(2) + axis_char + chr(37) + chr(self._pedestal_controller.get_slew_preset()) + chr(0) * 3
-        self._serial_client.send_command(msg)
+        self.set_moving(True)
+        self._serial_client.slew_negative_fixed(axis, self._slew_preset)
+
 
     def stop_slew(self, axis: int):
-        axis_char = ""
-        if axis == 1:
-            axis_char = chr(16)
-        else:  # axis = 2
-            axis_char = chr(17)
-        msg = "P" + chr(2) + axis_char + chr(36) + chr(0) + chr(0) * 3
-        self._serial_client.send_command(msg)
-        self._pedestal_controller.set_moving(False)  #update moving status to false
+        self._serial_client.stop_slew(axis)
+        #self._pedestal_controller.set_moving(False)  #update moving status to false
 
     def slew_to_az_el(self, azimuth: float, elevation: float):
         if azimuth < 0:
@@ -124,34 +101,16 @@ class AZEQ6Remote(): #TODO add IPedestalRemote inheritance
         if elevation < 0:
             while elevation < 0:
                 elevation += 360
-        hex_azimuth = hex(round(azimuth*(16777216/360)))[2:]  # from datasheet, also ignore '0x'
-        hex_elevation = hex(round(elevation * (16777216 / 360)))[2:]
-        hex_elevation =  hex_elevation.upper()  # convert to uppercase
-        hex_azimuth = hex_azimuth.upper()   # convert to uppercase
-        if (len(hex_azimuth) < 6):
-            hex_azimuth = "0"*(6 - len(hex_azimuth)) + hex_azimuth
-        if (len(hex_elevation) < 6):
-            hex_elevation = "0"*(6 - len(hex_elevation))  + hex_elevation
-
-        cmd: str = "b" + hex_azimuth + "00" + "," + hex_elevation + "00"
-        self._serial_client.send_command(cmd)
-
+        self._serial_client.goto_az_el(azimuth, elevation)
 
     def get_azimuth(self) -> float:
-        response = self._serial_client.communicate("Z")
-        #response = "12AB,12AB#"
-        az_string = response.split(",")[0]  # get the azimuth portion of controller response
-        az_string += "00"  # append 2 trailing zeros because 24 bit number
+        az_string = self._serial_client.get_azimuth()
         az = float.fromhex(az_string)  # convert from hex string to decimal number
         az = round((az/16777216)*360, 2)  # convert to degrees
         return az
 
     def get_elevation(self):
-        response = self._serial_client.communicate("Z")
-        #response = "12AB,12AB#"
-        el_string = response.split(",")[1]  # get the azimuth portion of controller response
-        el_string = el_string[0:-1]
-        el_string += "00"  # append 2 trailing zeros because 24 bit number
+        el_string = self._serial_client.get_elevation()
         el = float.fromhex(el_string)  # convert from hex string to decimal number
         el = round((el / 16777216) * 360, 2)  # convert to degrees
         if el >= 180:
@@ -159,56 +118,31 @@ class AZEQ6Remote(): #TODO add IPedestalRemote inheritance
         return el
 
     def is_slew_az_el(self) -> bool:
-        response = self._serial_client.communicate("L")
-        #moving: bool = int(response[0:-1])
-        response = response[0:-1]
-        print("response: " + response)
-        moving: bool = False
-        if response == "0":
-            moving = False
-        elif response == "1":
-            moving = True
-
-        return moving
+        return self._serial_client.is_goto()
 
     def sweep_thread(self, stop_sweep):
         """ Method to continously sweep pedestal between the 2 azimuth limits"""
-        elevation = self._pedestal_controller.get_elevation()
-        azimuth = self._pedestal_controller.get_azimuth()
+        elevation = self.get_elevation()
+        azimuth = self.get_azimuth()
         #  Stop pedestal if already moving:
         self.stop_slew(1)
         self.stop_slew(2)
-        #  make this a threaded function:
 
-        """while not stop_sweep:
-            while self.is_slew_az_el():
-                pass   # block if already moving
-                print("blocking")
-            self.slew_to_az_el(self._pedestal_controller.get_azimuth_limits()[0], elevation)  # when stopped slewing, go to min azimuth
-            print("slewing")
-            while self.is_slew_az_el():
-                pass  # block if already moving
-            self.slew_to_az_el(self._pedestal_controller.get_azimuth_limits()[1],elevation )  # when stopped slewing, go to min azimuth
-        print("thread exiting")"""
-        az_min = self._pedestal_controller.get_azimuth_limits()[0]
-        az_max = self._pedestal_controller.get_azimuth_limits()[1]
+        az_min = self._az_limits[0]
+        az_max = self._az_limits[1]
         delay = (az_max - az_min) / 3.1  # goto speed is approx 3 deg/sec
-        if azimuth not in [az_min, az_max]: #if current pos not in range, go to the max az to start sweep
+        if azimuth not in [az_min, az_max]:  # if current pos not in range, go to the max az to start sweep
             self.slew_to_az_el(az_max, elevation)
         while not stop_sweep:
-            self.slew_to_az_el(self._pedestal_controller.get_azimuth_limits()[0], elevation)
+            self.slew_to_az_el(self._az_limits[0], elevation)
             time.sleep(delay)
-            self.slew_to_az_el(self._pedestal_controller.get_azimuth_limits()[1], elevation)
-
-
-
+            self.slew_to_az_el(self._az_limits[1], elevation)
 
     def sweep_off(self):
         global stop_sweep
         stop_sweep = True  # stop sweep thread
         self.stop_slew(1)
         self.stop_slew(2)
-
 
     def sweep_on(self):
         global stop_sweep
@@ -217,19 +151,62 @@ class AZEQ6Remote(): #TODO add IPedestalRemote inheritance
         sweep_thread.daemon = True
         sweep_thread.start()
 
-    def sweep_test(self):
-        elevation = self._pedestal_controller.get_elevation()
-        az_min = self._pedestal_controller.get_azimuth_limits()[0]
-        az_max = self._pedestal_controller.get_azimuth_limits()[1]
-        delay = (az_max - az_min)/3.1  # goto speed is approx 3 deg/sec
-        try:
-            while True:
-                self.slew_to_az_el(self._pedestal_controller.get_azimuth_limits()[0], elevation)
-                time.sleep(delay)
-                self.slew_to_az_el(self._pedestal_controller.get_azimuth_limits()[1], elevation)
-        except KeyboardInterrupt:
-            pass
+    """Setter methods"""
+    def set_moving(self, status: bool):
+        self._moving = status
 
+    """Setter methods: """
+
+    def set_location(self, latitude: float, lat_dir: chr, longitude: float, long_dir: chr) -> None:
+        """ Manually set location if GPS device not functioning correctly"""
+        self._location = GPSLocation(latitude, lat_dir, longitude, long_dir)  #TODO fix type
+
+    def set_altitude(self, altitude: float) -> None:
+        """ Manually set altitude if GPS device not functioning correctly"""
+        self._altitude = altitude
+
+    def set_az_limits(self, az_limit: [float]) -> None:
+        """ Set azimuth limits for pedestal"""
+        self._az_limits = az_limit
+        #self._cf["Constraints"]["MinAzimuth"] = str(az_limit[0])
+        #self._cf["Constraints"]["MinAzimuth"] = str(az_limit[1])
+        # self.update_config_file()  # write changes back to config file
+
+    def set_el_limits(self, el_limits: [float]) -> None:
+        """ Set elevation limits for pedestal"""
+        self._el_limits = el_limits
+        # self.update_config_file()  # write changes back to config file
+
+    def set_slew_rate_limit(self, limit: float) -> None:
+        """ Set slew rate limits for pedestal"""
+        self._slew_rate_limit = limit
+    """Getter methods:"""
+    def get_location_str(self):
+        """ Method to return string representation of location"""
+        return self._location.__repr__()
+
+    def get_location(self):
+        """Return instance location object """
+        return self._location
+
+    def get_altitude(self):
+        return self._altitude
+
+    def get_azimuth_limits(self):
+        return self._az_limits
+
+    def is_moving(self) -> bool:
+        return self._moving
+
+    def get_slew_preset(self):
+        return self._slew_preset
+
+    def get_tn_offset(self):
+        """ MEthod to return true north offset"""
+        return self._az_offset
+
+    def get_horizontal_offset(self):
+        return self._el_offset
 
 if __name__ == "__main__":
 

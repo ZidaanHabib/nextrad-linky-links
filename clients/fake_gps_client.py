@@ -9,5 +9,5 @@ class FakeGPSClient:
 
 
     def get_altitude(self):
-        return 100.0
+        return 88.0
 

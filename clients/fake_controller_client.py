@@ -1,9 +1,9 @@
-from interfaces.controller_interface import ControllerInterface
+from interfaces.connection_interface import ControllerInterface
 from time import sleep
 import random
 
 
-class FakeControllerClient(ControllerInterface):
+class FakeControllerClient():
     """Fake controller used for development and testing purposes"""
 
     def __init__(self):
@@ -33,11 +33,3 @@ class FakeControllerClient(ControllerInterface):
         el = random.uniform(180, 360)
         return el
 
-    def communicate(self, cmd: str):
-        pass
-
-    def receive_response(self):
-        pass
-
-    def send_command(self, cmd: str):
-        pass
