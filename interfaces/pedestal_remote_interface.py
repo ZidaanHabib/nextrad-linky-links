@@ -3,8 +3,9 @@ from abc import ABC, abstractmethod
 
 class IPedestalRemote(ABC):
 
+    """Slewing methods:"""
     @abstractmethod
-    def slew_to_loc(self):
+    def slew_to_location(self, lat, long):
         pass
 
     @abstractmethod
@@ -12,19 +13,11 @@ class IPedestalRemote(ABC):
         pass
 
     @abstractmethod
-    def sweep_mode_on(self):
+    def slew_positive_preset(self):
         pass
 
     @abstractmethod
-    def sweep_mode_off(self):
-        pass
-
-    @abstractmethod
-    def slew_positive_fixed(self, axis):
-        pass
-
-    @abstractmethod
-    def slew_negative_fixed(self, axis):
+    def slew_negative_preset(self):
         pass
 
     @abstractmethod
@@ -32,7 +25,29 @@ class IPedestalRemote(ABC):
         pass
 
     @abstractmethod
-    def set_slew_speed(self):
+    def sweep_on(self):
+        pass
+
+    @abstractmethod
+    def sweep_off(self):
+        pass
+
+    @abstractmethod
+    def slew_positive_specific(self, axis):
+        pass
+
+    @abstractmethod
+    def slew_negative_specific(self, axis):
+        pass
+
+    @abstractmethod
+    def is_moving(self) -> bool:
+        pass
+
+    """Setter methods"""
+
+    @abstractmethod
+    def set_slew_rate(self):
         pass
 
     @abstractmethod
@@ -40,9 +55,64 @@ class IPedestalRemote(ABC):
         pass
 
     @abstractmethod
+    def set_moving(self, status: bool):
+        pass
+
+    @abstractmethod
+    def set_location(self, latitude: float, lat_dir: chr, longitude: float, long_dir: chr) -> None:
+        pass
+
+    @abstractmethod
+    def set_altitude(self, altitude: float) -> None:
+        pass
+
+    @abstractmethod
+    def set_az_limits(self, az_limit: [float]) -> None:
+        pass
+
+    @abstractmethod
+    def set_el_limits(self, el_limits: [float]) -> None:
+        pass
+
+    @abstractmethod
+    def set_slew_rate_limit(self, limit: float) -> None:
+        pass
+
+
+    """Getter methods:"""
+
+    @abstractmethod
     def get_azimuth(self):
         pass
 
     @abstractmethod
     def get_elevation(self):
+        pass
+
+    @abstractmethod
+    def get_location_str(self):
+        pass
+
+    @abstractmethod
+    def get_location(self):
+        pass
+
+    @abstractmethod
+    def get_altitude(self):
+        pass
+
+    @abstractmethod
+    def get_azimuth_limits(self):
+        pass
+
+    @abstractmethod
+    def get_slew_preset(self):
+        pass
+
+    @abstractmethod
+    def get_tn_offset(self):
+        pass
+
+    @abstractmethod
+    def get_horizontal_offset(self):
         pass
