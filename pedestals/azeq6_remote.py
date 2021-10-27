@@ -89,6 +89,24 @@ class AZEQ6Remote: #TODO add IPedestalRemote inheritance
         self.set_moving(True)
         self._serial_client.slew_negative_fixed(axis, self._slew_preset)
 
+    def slew_negative_specific(self, axis: int, rate: float):
+        if self.is_moving():  # make sure pedestal not already moving
+            self.stop_slew(axis)  # stop pedestal if already moving
+        self.set_moving(True)
+
+        slew_rate = rate if rate <= self._slew_rate_limit else self._slew_rate_limit
+
+        azimuth_diff = abs(self.get_azimuth() - self._az_limits[1])
+        if azimuth_diff > 180:
+            azimuth_diff = 360 - azimuth_diff
+
+        elevation_diff = abs(self.get_elevation() - self._el_limits[1])
+        if elevation_diff > 180:
+            elevation_diff = 360 - elevation_diff
+
+        self._serial_client.slew_negative_specific(axis, slew_rate, azimuth_diff, elevation_diff)
+
+
     def stop_slew(self, axis: int):
         self._serial_client.stop_slew(axis)
         #self._pedestal_controller.set_moving(False)  #update moving status to false
