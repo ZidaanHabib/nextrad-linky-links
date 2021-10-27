@@ -51,11 +51,11 @@ class IPedestalDevice(ABC):
     """Setter methods"""
 
     @abstractmethod
-    def set_slew_rate(self):
+    def set_slew_rate(self, rate):
         pass
 
     @abstractmethod
-    def set_slew_preset(self):
+    def set_slew_preset(self, preset):
         pass
 
     @abstractmethod

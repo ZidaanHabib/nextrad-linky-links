@@ -14,7 +14,7 @@ from dtypes.gps_location import GPSLocation
 from configparser import ConfigParser
 
 
-class AZEQ6Pedestal: #TODO add IPedestalDevice inheritance
+class AZEQ6Pedestal(IPedestalDevice): #TODO add IPedestalDevice inheritance
 
     def __init__(self, sc: SynscanSerialClient, gps_client):
         #  client members:
@@ -197,7 +197,15 @@ class AZEQ6Pedestal: #TODO add IPedestalDevice inheritance
     def set_slew_rate_limit(self, limit: float) -> None:
         """ Set slew rate limits for pedestal"""
         self._slew_rate_limit = limit
+
+    def set_slew_rate(self, rate):
+        self._slew_rate = rate
+
+    def set_slew_preset(self, preset):
+        self._slew_preset = preset
+
     """Getter methods:"""
+
     def get_location_str(self):
         """ Method to return string representation of location"""
         return self._location.__repr__()
