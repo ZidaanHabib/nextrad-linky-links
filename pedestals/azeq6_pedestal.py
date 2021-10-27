@@ -14,7 +14,7 @@ from dtypes.gps_location import GPSLocation
 from configparser import ConfigParser
 
 
-class AZEQ6Pedestal(IPedestalDevice): #TODO add IPedestalDevice inheritance
+class AZEQ6Pedestal(IPedestalDevice):
 
     def __init__(self, sc: SynscanSerialClient, gps_client):
         #  client members:
