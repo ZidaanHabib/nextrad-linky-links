@@ -23,6 +23,7 @@ class ControllerMath:
 
     @staticmethod
     def determine_azimuth_difference(source_lat: float, source_long: float, target_lat: float, target_long: float):
+        """ Method to compute azimuth difference between the source and target location with respect to true north"""
         source_lat = radians(source_lat)
         source_long = radians(source_long)
         target_lat = radians(target_lat)
@@ -37,6 +38,7 @@ class ControllerMath:
 
     @staticmethod
     def determine_elevation_difference(source_alt: float, target_alt: float, distance):
+        """ Method to compute elevation difference between the source and target location"""
         delta_height = source_alt - target_alt
         elevation_degrees = degrees(atan(delta_height/distance))
         return round(elevation_degrees,2)
