@@ -80,18 +80,21 @@ class SynscanSerialClient():
         self.stop_slew(axis)
 
 
-    def slew_negative_variable(self, axis: chr, rate: float ):  # rate is in arcseconds per sec
+    def slew_negative_specific(self, axis: chr, slew_rate: float,  azimuth_diff, elevation_diff ):  # rate is in arcseconds per sec
         """Slew in negative direction at a specific rate in arcseconds per sec"""
-        track_rate_high: int = int((rate * 4) // 256)  # according to data sheet
-        track_rate_low: int = int((rate * 4) % 256)   # according to data sheet
-
+        slew_rate_whole = int((slew_rate * 4) // 256)
+        slew_rate_rem = int((slew_rate * 4) % 256)
         axis_char = ""
+        wait = 0
         if axis == 1:  # azimuth axis
             axis_char = chr(16)
-        else:  # axis = 2  elevation axis
+            wait = azimuth_diff / (slew_rate * 0.000277778)  # 1 arcsec/sec = 0.000277778  degrees/sec
+        else:  # axis = 2  , elevation axis
             axis_char = chr(17)
-        msg: str = "P" + chr(3) + axis_char + chr(7) + chr(track_rate_high) + chr(track_rate_low) + chr(0) * 2
-        self._serial_connection.send_command(msg)
+            wait = elevation_diff / (slew_rate * 0.000277778)
+        cmd = "P" + chr(3) + axis_char + chr(6) + chr(slew_rate_whole) + chr(slew_rate_rem) + chr(0) * 2
+        time.sleep(wait)
+        self.stop_slew(axis)
 
     def stop_slew(self, axis):
         axis_char = ""
