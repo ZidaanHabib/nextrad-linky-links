@@ -2,6 +2,15 @@ from interfaces.command_interface import ICommand
 from interfaces.pedestal_remote_interface import IPedestalRemote
 
 
+class Test(ICommand):
+
+    def __init__(self, pedestal_device: IPedestalRemote):
+        self.pedestal_device = pedestal_device
+
+    def execute(self):
+        print("Command pattern test successful!!!!!")
+
+
 class Calibrate(ICommand):
 
     def __init__(self, pedestal_device: IPedestalRemote):
