@@ -9,7 +9,7 @@ from helpers.controller_helper_functions import ControllerMath
 
 class PedestalController:
 
-    def __init__(self, serial_client: ControllerInterface, gps_client): #TODO change tye to ControllerInterface or more accurately, IPedestalRemote
+    def __init__(self, serial_client: ControllerInterface, gps_client): #TODO change tye to ControllerInterface or more accurately, IPedestalDevice
         self._serial_client: SynscanSerialClient = serial_client
         self._gps_client: GPSClient = gps_client
 

@@ -1,6 +1,6 @@
-from interfaces.pedestal_remote_interface import IPedestalRemote
+from interfaces.pedestal_device_interface import IPedestalDevice
 
-class FakePedestal(IPedestalRemote): #TODO add IPedestalRemote inheritance
+class FakePedestal(IPedestalDevice): #TODO add IPedestalDevice inheritance
 
     def calibrate(self):
         """ Set current azimuth and elevation to be the 0,0 point"""

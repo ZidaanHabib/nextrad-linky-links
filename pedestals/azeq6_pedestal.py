@@ -1,4 +1,4 @@
-from interfaces.pedestal_remote_interface import IPedestalRemote
+from interfaces.pedestal_device_interface import IPedestalDevice
 from interfaces.connection_interface import ControllerInterface
 from clients.pedestal_controller import PedestalController
 from helpers.controller_helper_functions import ControllerMath
@@ -14,7 +14,7 @@ from dtypes.gps_location import GPSLocation
 from configparser import ConfigParser
 
 
-class AZEQ6Remote: #TODO add IPedestalRemote inheritance
+class AZEQ6Pedestal: #TODO add IPedestalDevice inheritance
 
     def __init__(self, sc: SynscanSerialClient, gps_client):
         #  client members:
@@ -230,7 +230,7 @@ if __name__ == "__main__":
     os.chdir("../")
     sc = SynscanSerialClient()
     pc = PedestalController(sc, FakeGPSClient())
-    az = AZEQ6Remote(pc, sc)
+    az = AZEQ6Pedestal(pc, sc)
    #pc.set_az_limits([0,30])
     #print(pc.get_azimuth_limits())
     print("Azimuth: " + str(az.get_azimuth()))

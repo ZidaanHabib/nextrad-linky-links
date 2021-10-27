@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 
 
-class IPedestalRemote(ABC):
+class IPedestalDevice(ABC):
 
     @abstractmethod
     def calibrate(self):

@@ -1,10 +1,10 @@
 from interfaces.command_interface import ICommand
-from interfaces.pedestal_remote_interface import IPedestalRemote
+from interfaces.pedestal_device_interface import IPedestalDevice
 
 
 class Test(ICommand):
 
-    def __init__(self, pedestal_device: IPedestalRemote):
+    def __init__(self, pedestal_device: IPedestalDevice):
         self.pedestal_device = pedestal_device
 
     def execute(self):
@@ -13,7 +13,7 @@ class Test(ICommand):
 
 class Calibrate(ICommand):
 
-    def __init__(self, pedestal_device: IPedestalRemote):
+    def __init__(self, pedestal_device: IPedestalDevice):
         self.pedestal_device = pedestal_device
 
     def execute(self):
@@ -22,7 +22,7 @@ class Calibrate(ICommand):
 
 class SweepOn(ICommand):
 
-    def __init__(self, pedestal_device: IPedestalRemote):
+    def __init__(self, pedestal_device: IPedestalDevice):
         self.pedestal_device = pedestal_device
 
     def execute(self):
@@ -31,7 +31,7 @@ class SweepOn(ICommand):
 
 class SweepOff(ICommand):
 
-    def __init__(self, pedestal_device: IPedestalRemote):
+    def __init__(self, pedestal_device: IPedestalDevice):
         self.pedestal_device = pedestal_device
 
     def execute(self):
@@ -40,7 +40,7 @@ class SweepOff(ICommand):
 
 class StopSlew(ICommand):
 
-    def __init__(self, pedestal_device: IPedestalRemote):
+    def __init__(self, pedestal_device: IPedestalDevice):
         self.pedestal_device = pedestal_device
 
     def execute(self):
@@ -49,7 +49,7 @@ class StopSlew(ICommand):
 
 class StartSlewPreset(ICommand):
 
-    def __init__(self, pedestal_device: IPedestalRemote, axis):
+    def __init__(self, pedestal_device: IPedestalDevice, axis):
         self.pedestal_device = pedestal_device
         self.axis = axis
 
@@ -59,7 +59,7 @@ class StartSlewPreset(ICommand):
 
 class GoToLocation(ICommand):
 
-    def __init__(self, pedestal_device: IPedestalRemote, lat, long):
+    def __init__(self, pedestal_device: IPedestalDevice, lat, long):
         self.pedestal_device = pedestal_device
         self.lat = lat
         self.long = long
@@ -70,7 +70,7 @@ class GoToLocation(ICommand):
 
 class GoToAzEl(ICommand):
 
-    def __init__(self, pedestal_device: IPedestalRemote, az, el):
+    def __init__(self, pedestal_device: IPedestalDevice, az, el):
         self.pedestal_device = pedestal_device
         self.az = az
         self.el = el
@@ -81,7 +81,7 @@ class GoToAzEl(ICommand):
 
 class GetOrientation(ICommand):
 
-    def __init__(self, pedestal_device: IPedestalRemote):
+    def __init__(self, pedestal_device: IPedestalDevice):
         self.pedestal_device = pedestal_device
 
     def execute(self):
