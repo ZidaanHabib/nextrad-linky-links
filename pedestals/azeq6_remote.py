@@ -33,6 +33,7 @@ class AZEQ6Remote(): #TODO add IPedestalRemote inheritance
         pass
 
     def slew_to_location(self, target_lat, target_long, target_altitude):
+        """ Method to slew to a target location entered in latitude and longitude"""
         src_lat = self._pedestal_controller.get_location().get_latitude()
         src_long = self._pedestal_controller.get_location().get_longitude()
 
@@ -59,6 +60,40 @@ class AZEQ6Remote(): #TODO add IPedestalRemote inheritance
             axis_char = chr(17)
         msg: str = "P" + chr(2) + axis_char + chr(36) + chr(self._pedestal_controller.get_slew_preset()) + chr(0)*3
         self._serial_client.communicate(msg)
+
+    def slew_positive_specific(self, axis: int, rate: float):
+        if self._pedestal_controller.is_moving():  # make sure pedestal not already moving
+            self.stop_slew(axis)  # stop pedestal if already moving
+        self._pedestal_controller.set_moving(True)
+
+        slew_rate = rate if rate <= self._pedestal_controller._slew_rate_limit else self._pedestal_controller._slew_rate_limit
+        #  separate slew rate into high and low byte according to datasheet:
+        #TODO move the below cmd string creation into the hand controller client
+        slew_rate_whole = int((slew_rate * 4) // 256)
+        slew_rate_rem = int((slew_rate * 4) % 256)
+
+        azimuth_diff = abs(self.get_azimuth() - self._pedestal_controller._az_limits[1])
+        if azimuth_diff > 180:
+            azimuth_diff = 360 - azimuth_diff
+        elevation_diff = abs(self.get_elevation() - self._pedestal_controller._el_limits[1])
+        if elevation_diff > 180:
+            elevation_diff = 360 - elevation_diff
+        #  1 arcsec/sec = 0.000277778  degrees/sec
+
+        axis_char = ""
+        wait = 0
+        if axis == 1:  # azimuth axis
+            axis_char = chr(16)
+            wait = azimuth_diff/(slew_rate * 0.000277778)
+        else:  # axis = 2  , elevation axis
+            axis_char = chr(17)
+            wait = elevation_diff / (slew_rate * 0.000277778)
+        cmd = "P" + chr(3) + axis_char + chr(6) + chr(slew_rate_whole) + chr(slew_rate_rem) + chr(0)*2
+        time.sleep(wait)
+        self.stop_slew(axis)
+
+
+
 
     def slew_negative_fixed(self, axis: int):
         if self._pedestal_controller.is_moving():  # make sure pedestal not already moving
