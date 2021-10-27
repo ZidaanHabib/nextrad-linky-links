@@ -3,13 +3,17 @@ from abc import ABC, abstractmethod
 
 class IPedestalRemote(ABC):
 
+    @abstractmethod
+    def calibrate(self):
+        pass
+
     """Slewing methods:"""
     @abstractmethod
     def slew_to_location(self, lat, long):
         pass
 
     @abstractmethod
-    def slew_to_az_el(self):
+    def slew_to_az_el(self, azimuth, elevation):
         pass
 
     @abstractmethod
