@@ -1,23 +1,26 @@
+"""Interfaces:"""
 from interfaces.pedestal_device_interface import IPedestalDevice
 from interfaces.connection_interface import ConnectionInterface
+from interfaces.controller_interface import IControllerInterface
+"""Clients:"""
 from clients.pedestal_controller import PedestalController
-from helpers.controller_helper_functions import ControllerMath
-#testing:
 from clients.hand_controller_serial_client import SynscanSerialClient
 from clients.fake_gps_client import FakeGPSClient
 from clients.fake_controller_client import FakeControllerClient
+
+from helpers.controller_helper_functions import ControllerMath
+#testing:
+from dtypes.gps_location import GPSLocation
+from configparser import ConfigParser
 import time
 import os
 from threading import Thread
-from clients.hand_controller_serial_client import SynscanSerialClient
-from dtypes.gps_location import GPSLocation
-from configparser import ConfigParser
-from clients.fake_controller_client import FakeControllerClient
+
 
 
 class AZEQ6Pedestal(IPedestalDevice):
 
-    def __init__(self, sc: SynscanSerialClient, gps_client):
+    def __init__(self, sc: IControllerInterface, gps_client):
         #  client members:
         self._serial_client = sc
         self._gps_client = gps_client
