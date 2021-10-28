@@ -34,6 +34,10 @@ class IControllerInterface(ABC):
         pass
 
     @abstractmethod
+    def slew_step(self, axis, direction, slew_rate):
+        pass
+
+    @abstractmethod
     def get_azimuth(self) -> str:
         pass
 

@@ -121,6 +121,7 @@ class AZEQ6Pedestal(IPedestalDevice):
         self._serial_client.slew_negative_specific(axis, slew_rate, azimuth_diff, elevation_diff)
 
     def stop_slew(self, axis: int):
+        self.set_moving(False)
         self._serial_client.stop_slew(axis)
         #self._pedestal_controller.set_moving(False)  #update moving status to false
 
@@ -158,9 +159,6 @@ class AZEQ6Pedestal(IPedestalDevice):
         sweep_thread.start()
 
     def slew_test(self, axis, dir):  # TODO test this on the pedestal
-        if self.is_moving():  # make sure pedestal not already moving
-            self.stop_slew(axis)  # stop pedestal if already moving
-        self.set_moving(True)
 
         if axis == 1:
             azimuth = self.get_azimuth()
@@ -172,6 +170,15 @@ class AZEQ6Pedestal(IPedestalDevice):
             while self._moving and elevation < self._el_limits[1]:
                 self._serial_client.slew_step(axis, dir, self._slew_rate)
                 elevation = self.get_elevation()
+
+    def start_slew_test(self, axis, dir):
+        if self.is_moving():  # make sure pedestal not already moving
+            self.stop_slew(axis)  # stop pedestal if already moving
+        self.set_moving(True)
+
+        thread = Thread(target=self.slew_test, args=[axis, dir])
+        thread.daemon = True
+        thread.start()
 
     """Get methods: """
 
