@@ -47,6 +47,16 @@ class AZEQ6Pedestal(IPedestalDevice):
         """ Set current azimuth and elevation to be the 0,0 point"""
         self._serial_client.calibrate_command()
 
+    """Slewing methods: """
+    def slew_to_az_el(self, azimuth: float, elevation: float):
+        if azimuth < 0:
+            while azimuth < 0:
+                azimuth += 360
+        if elevation < 0:
+            while elevation < 0:
+                elevation += 360
+        self._serial_client.goto_az_el(azimuth, elevation)
+
     def slew_to_location(self, target_lat, target_long, target_altitude):
         """ Method to slew to a target location entered in latitude and longitude"""
         src_lat = self._location.get_latitude()
@@ -110,36 +120,10 @@ class AZEQ6Pedestal(IPedestalDevice):
 
         self._serial_client.slew_negative_specific(axis, slew_rate, azimuth_diff, elevation_diff)
 
-
     def stop_slew(self, axis: int):
         self._serial_client.stop_slew(axis)
         #self._pedestal_controller.set_moving(False)  #update moving status to false
 
-    def slew_to_az_el(self, azimuth: float, elevation: float):
-        if azimuth < 0:
-            while azimuth < 0:
-                azimuth += 360
-        if elevation < 0:
-            while elevation < 0:
-                elevation += 360
-        self._serial_client.goto_az_el(azimuth, elevation)
-
-    def get_azimuth(self) -> float:
-        az_string = self._serial_client.get_azimuth()
-        az = float.fromhex(az_string)  # convert from hex string to decimal number
-        az = round((az/16777216)*360, 2)  # convert to degrees
-        return az
-
-    def get_elevation(self):
-        el_string = self._serial_client.get_elevation()
-        el = float.fromhex(el_string)  # convert from hex string to decimal number
-        el = round((el / 16777216) * 360, 2)  # convert to degrees
-        if el >= 180:
-            el = -1*(360 - el)  # use negative degrees instead
-        return el
-
-    def is_slew_az_el(self) -> bool:
-        return self._serial_client.is_goto()
 
     def sweep_thread(self, stop_sweep):
         """ Method to continously sweep pedestal between the 2 azimuth limits"""
@@ -174,11 +158,55 @@ class AZEQ6Pedestal(IPedestalDevice):
         sweep_thread.daemon = True
         sweep_thread.start()
 
+    """Get methods: """
+
+    def get_azimuth(self) -> float:
+        az_string = self._serial_client.get_azimuth()
+        az = float.fromhex(az_string)  # convert from hex string to decimal number
+        az = round((az/16777216)*360, 2)  # convert to degrees
+        return az
+
+    def get_elevation(self):
+        el_string = self._serial_client.get_elevation()
+        el = float.fromhex(el_string)  # convert from hex string to decimal number
+        el = round((el / 16777216) * 360, 2)  # convert to degrees
+        if el >= 180:
+            el = -1*(360 - el)  # use negative degrees instead
+        return el
+
+    def is_slew_az_el(self) -> bool:
+        return self._serial_client.is_goto()
+
+    def get_location_str(self):
+        """ Method to return string representation of location"""
+        return self._location.__repr__()
+
+    def get_location(self):
+        """Return instance location object """
+        return self._location
+
+    def get_altitude(self):
+        return self._altitude
+
+    def get_azimuth_limits(self):
+        return self._az_limits
+
+    def is_moving(self) -> bool:
+        return self._moving
+
+    def get_slew_preset(self):
+        return self._slew_preset
+
+    def get_tn_offset(self):
+        """ MEthod to return true north offset"""
+        return self._az_offset
+
+    def get_horizontal_offset(self):
+        return self._el_offset
+
     """Setter methods"""
     def set_moving(self, status: bool):
         self._moving = status
-
-    """Setter methods: """
 
     def set_location(self, latitude: float, lat_dir: chr, longitude: float, long_dir: chr) -> None:
         """ Manually set location if GPS device not functioning correctly"""
@@ -210,34 +238,6 @@ class AZEQ6Pedestal(IPedestalDevice):
     def set_slew_preset(self, preset):
         self._slew_preset = preset
 
-    """Getter methods:"""
-
-    def get_location_str(self):
-        """ Method to return string representation of location"""
-        return self._location.__repr__()
-
-    def get_location(self):
-        """Return instance location object """
-        return self._location
-
-    def get_altitude(self):
-        return self._altitude
-
-    def get_azimuth_limits(self):
-        return self._az_limits
-
-    def is_moving(self) -> bool:
-        return self._moving
-
-    def get_slew_preset(self):
-        return self._slew_preset
-
-    def get_tn_offset(self):
-        """ MEthod to return true north offset"""
-        return self._az_offset
-
-    def get_horizontal_offset(self):
-        return self._el_offset
 
 if __name__ == "__main__":
 
