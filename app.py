@@ -1,10 +1,12 @@
 from paho.mqtt import client as mqtt
 from configparser import ConfigParser
-from clients.pedestal_controller import PedestalController
-from clients.fake_controller_client import FakeControllerClient
-from clients.gps_client import GPSClient
-from clients.fake_gps_client import FakeGPSClient
 
+from pedestals.fake_pedestal import FakePedestal
+from commands import command_classes
+from commands.button import Button
+
+from remotes.azeq6_remote import AZEQ6Pedestal
+from remotes.fake_pedestal_remote import FakePedestalRemote
 
 def on_connect(client, userdata, flags, rc):
     if rc == 0:
@@ -33,6 +35,16 @@ def on_message(client, userdata, msg_enc) -> str:
 
 
 def main():
+
+    # Instantiate pedestal controller object:
+    pc = FakePedestalRemote.get_pedestal_device()
+
+    # bind commands to buttons as per command design pattern.
+    command = command_classes.Test(pc)
+    test_button = Button(command)
+    test_button.press()
+
+
     cf = ConfigParser()
     cf.read("config.ini")
 
@@ -45,8 +57,8 @@ def main():
     client.on_subscribe = on_subscribe
     client.on_message = on_message
 
-    # Instantiate pedestal controller object:
-    pc = PedestalController(FakeControllerClient(), FakeGPSClient())
+
+    #pc = PedestalController(FakeControllerClient(), FakeGPSClient())
     try:
         client.connect(host="localhost", port=1883)
     except Exception as e:
