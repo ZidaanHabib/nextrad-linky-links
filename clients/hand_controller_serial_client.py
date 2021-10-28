@@ -5,8 +5,9 @@ import serial
 from time import sleep
 from threading import Lock
 from clients.serial_connection import SerialConnection
+from interfaces.controller_interface import IControllerInterface
 
-class SynscanSerialClient():
+class SynscanSerialClient(IControllerInterface):
 
     def __init__(self, connection: SerialConnection ):
         super(SynscanSerialClient, self).__init__()
@@ -105,9 +106,9 @@ class SynscanSerialClient():
         msg = "P" + chr(2) + axis_char + chr(36) + chr(0) + chr(0) * 3
         self._serial_connection.send_command(msg)
 
-    def set_tracking(self, mode):
+    """def set_tracking(self, mode):
         msg = "T" + str(mode)
-        self._serial_connection.send_command(msg)
+        self._serial_connection.send_command(msg)"""
 
 
     def get_azimuth(self) -> str:
