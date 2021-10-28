@@ -1,10 +1,10 @@
 import time
 
 import serial
-#from interfaces.connection_interface import ControllerInterface
+#from interfaces.connection_interface import ConnectionInterface
 from time import sleep
 from threading import Lock
-from serial_connection import SerialConnection
+from clients.serial_connection import SerialConnection
 
 class SynscanSerialClient():
 

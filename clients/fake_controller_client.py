@@ -1,4 +1,4 @@
-from interfaces.connection_interface import ControllerInterface
+from interfaces.connection_interface import ConnectionInterface
 from time import sleep
 import random
 
