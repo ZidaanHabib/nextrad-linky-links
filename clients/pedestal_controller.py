@@ -1,7 +1,7 @@
 from clients.gps_client import GPSClient
 from dtypes.gps_location import GPSLocation
 from clients.hand_controller_serial_client import SynscanSerialClient
-from interfaces.connection_interface import ControllerInterface
+from interfaces.connection_interface import ConnectionInterface
 from configparser import ConfigParser
 import os
 from helpers.controller_helper_functions import ControllerMath
@@ -9,7 +9,7 @@ from helpers.controller_helper_functions import ControllerMath
 
 class PedestalController:
 
-    def __init__(self, serial_client: ControllerInterface, gps_client): #TODO change tye to ControllerInterface or more accurately, IPedestalDevice
+    def __init__(self, serial_client: ConnectionInterface, gps_client): #TODO change tye to ConnectionInterface or more accurately, IPedestalDevice
         self._serial_client: SynscanSerialClient = serial_client
         self._gps_client: GPSClient = gps_client
 
