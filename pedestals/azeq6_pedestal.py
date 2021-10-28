@@ -124,7 +124,6 @@ class AZEQ6Pedestal(IPedestalDevice):
         self._serial_client.stop_slew(axis)
         #self._pedestal_controller.set_moving(False)  #update moving status to false
 
-
     def sweep_thread(self, stop_sweep):
         """ Method to continously sweep pedestal between the 2 azimuth limits"""
         elevation = self.get_elevation()
@@ -153,10 +152,26 @@ class AZEQ6Pedestal(IPedestalDevice):
     def sweep_on(self):
         #global stop_sweep
         #stop_sweep = False
-        self._moving = True  #  TODO maybe remove this after testing
+        self._moving = True
         sweep_thread = Thread(target=self.sweep_thread)
         sweep_thread.daemon = True
         sweep_thread.start()
+
+    def slew_test(self, axis, dir):  # TODO test this on the pedestal
+        if self.is_moving():  # make sure pedestal not already moving
+            self.stop_slew(axis)  # stop pedestal if already moving
+        self.set_moving(True)
+
+        if axis == 1:
+            azimuth = self.get_azimuth()
+            while self._moving and azimuth < self._az_limits[1]:
+                self._serial_client.slew_step(axis, dir, self._slew_rate)
+                azimuth = self.get_azimuth()
+        else:
+            elevation = self.get_elevation()
+            while self._moving and elevation < self._el_limits[1]:
+                self._serial_client.slew_step(axis, dir, self._slew_rate)
+                elevation = self.get_elevation()
 
     """Get methods: """
 
