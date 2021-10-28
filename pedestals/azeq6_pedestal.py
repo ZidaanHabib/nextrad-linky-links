@@ -1,5 +1,5 @@
 from interfaces.pedestal_device_interface import IPedestalDevice
-from interfaces.connection_interface import ControllerInterface
+from interfaces.connection_interface import ConnectionInterface
 from clients.pedestal_controller import PedestalController
 from helpers.controller_helper_functions import ControllerMath
 #testing:
@@ -12,6 +12,7 @@ from threading import Thread
 from clients.hand_controller_serial_client import SynscanSerialClient
 from dtypes.gps_location import GPSLocation
 from configparser import ConfigParser
+from clients.fake_controller_client import FakeControllerClient
 
 
 class AZEQ6Pedestal(IPedestalDevice):
@@ -150,21 +151,23 @@ class AZEQ6Pedestal(IPedestalDevice):
         delay = (az_max - az_min) / 3.1  # goto speed is approx 3 deg/sec
         if azimuth not in [az_min, az_max]:  # if current pos not in range, go to the max az to start sweep
             self.slew_to_az_el(az_max, elevation)
-        while not stop_sweep:
+        while self._moving:
             self.slew_to_az_el(self._az_limits[0], elevation)
             time.sleep(delay)
             self.slew_to_az_el(self._az_limits[1], elevation)
 
     def sweep_off(self):
-        global stop_sweep
-        stop_sweep = True  # stop sweep thread
+        """global stop_sweep
+        stop_sweep = True  # stop sweep thread"""
         self.stop_slew(1)
         self.stop_slew(2)
+        self.set_moving(False)
 
     def sweep_on(self):
-        global stop_sweep
-        stop_sweep = False
-        sweep_thread = Thread(target=self.sweep_thread, args=[stop_sweep])
+        #global stop_sweep
+        #stop_sweep = False
+        self._moving = True  #  TODO maybe remove this after testing
+        sweep_thread = Thread(target=self.sweep_thread)
         sweep_thread.daemon = True
         sweep_thread.start()
 
