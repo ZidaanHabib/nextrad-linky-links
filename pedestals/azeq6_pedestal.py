@@ -39,7 +39,7 @@ class AZEQ6Pedestal(IPedestalDevice):
         self.initialise_axes_limits()
         self._slew_rate_limit: float = float(self._cf["Constraints"]["MaxSlewRate"])
 
-        self._slew_rate = 150.0  #arcsec/sec
+        self._slew_rate = 3   #degrees/sec
         self._slew_preset = 9
 
         self._moving = False
@@ -92,21 +92,20 @@ class AZEQ6Pedestal(IPedestalDevice):
 
         self.slew_to_az_el(round(azimuth_final), round(elevation_final))  # move
 
-    def slew_positive_specific(self, axis: int, rate: float):
+    def slew_positive_specific(self, axis: int):
         if self.is_moving():  # make sure pedestal not already moving
             self.stop_slew(axis)  # stop pedestal if already moving
         self.set_moving(True)
 
-        slew_rate = rate if rate <= self._slew_rate_limit else self._slew_rate_limit
+        #slew_rate = rate if rate <= self._slew_rate_limit else self._slew_rate_limit
 
         azimuth_diff = abs(self.get_azimuth() - self._az_limits[1])
         if azimuth_diff > 180:
             azimuth_diff = 360 - azimuth_diff
-
         elevation_diff = abs(self.get_elevation() - self._el_limits[1])
         if elevation_diff > 180:
             elevation_diff = 360 - elevation_diff
-
+        slew_rate = self._slew_rate*3600  # convert degrees/sec to arcsec/sec
         self._serial_client.slew_positive_specific(axis, slew_rate, azimuth_diff, elevation_diff)
 
     def slew_positive_preset(self, axis):  #axis == 1: azimuth, 2: elevation
@@ -278,7 +277,7 @@ class AZEQ6Pedestal(IPedestalDevice):
         """ Set slew rate limits for pedestal"""
         self._slew_rate_limit = limit
 
-    def set_slew_rate(self, rate):
+    def set_slew_rate(self, rate):  # degrees per sec
         self._slew_rate = rate
 
     def set_slew_preset(self, preset):
