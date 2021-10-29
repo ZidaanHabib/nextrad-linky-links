@@ -17,3 +17,7 @@ class AZEQ6PedestalRemote:
     @staticmethod
     def get_fake_pedestal_device() -> IPedestalDevice:
         return AZEQ6Pedestal(FakeControllerClient(), FakeGPSClient())
+
+    @staticmethod
+    def get_pedestal_device_wo_gps() -> IPedestalDevice:
+        return AZEQ6Pedestal(SynscanSerialClient(SerialConnection()), FakeGPSClient())
