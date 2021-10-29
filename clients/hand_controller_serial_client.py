@@ -14,6 +14,7 @@ class SynscanSerialClient(IControllerInterface):
         self._serial_connection = connection
 
     def calibrate_command(self):
+        self.set_tracking(1)  # set to alt-az mode
         response = self._serial_connection.communicate("P" + chr(4) + chr(16) +
                                          chr(4) + chr(0) + chr(0) +
                                          chr(0) + chr(0))  # manufacturer command to set current azimuth as 0
@@ -77,11 +78,13 @@ class SynscanSerialClient(IControllerInterface):
         wait = 0
         if axis == 1:  # azimuth axis
             axis_char = chr(16)
-            wait = azimuth_diff / (slew_rate * 0.000277778)  # 1 arcsec/sec = 0.000277778  degrees/sec
+            wait = azimuth_diff / (slew_rate / 3600)  # 1 arcsec/sec = 0.000277778  degrees/sec
         else:  # axis = 2  , elevation axis
             axis_char = chr(17)
-            wait = elevation_diff / (slew_rate * 0.000277778)
+            wait = elevation_diff / (slew_rate / 3600)
         cmd = "P" + chr(3) + axis_char + chr(6) + chr(slew_rate_whole) + chr(slew_rate_rem) + chr(0) * 2
+        print(wait)
+        response = self._serial_connection.communicate(cmd)
         time.sleep(wait)
         self.stop_slew(axis)
 
@@ -111,9 +114,9 @@ class SynscanSerialClient(IControllerInterface):
         msg = "P" + chr(2) + axis_char + chr(36) + chr(0) + chr(0) * 3
         self._serial_connection.send_command(msg)
 
-    """def set_tracking(self, mode):
+    def set_tracking(self, mode):
         msg = "T" + str(mode)
-        self._serial_connection.send_command(msg)"""
+        self._serial_connection.send_command(msg)
 
     def slew_step(self, axis, direction, slew_rate):
         """ Method to slew pedestal by 1 degree"""
