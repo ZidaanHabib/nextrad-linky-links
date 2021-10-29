@@ -46,6 +46,6 @@ class ControllerMath:
 
 
 if __name__ == "__main__":
-    print(ControllerMath.determine_azimuth_difference(40.4970900,-74.9159100, 41.68112, -75.83867))  # output is correct
-    print(ControllerMath.determine_elevation_difference(88, 15, 973))  # output is correct @ 4.29
+    print(ControllerMath.determine_azimuth_difference(-33.9586853, 18.4601156, -33.95898249833889, 18.470658926566475))  # output is correct
+    #print(ControllerMath.determine_elevation_difference(88, 15, 973))  # output is correct @ 4.29
     #TODO check if pedestal rotates the long way around when moving to the (360 - 4.29)
