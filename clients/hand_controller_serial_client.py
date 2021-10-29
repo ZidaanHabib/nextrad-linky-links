@@ -14,12 +14,17 @@ class SynscanSerialClient(IControllerInterface):
         self._serial_connection = connection
 
     def calibrate_command(self):
-        self._serial_connection.send_command("P" + chr(4) + chr(16) +
+        response = self._serial_connection.communicate("P" + chr(4) + chr(16) +
                                          chr(4) + chr(0) + chr(0) +
                                          chr(0) + chr(0))  # manufacturer command to set current azimuth as 0
-        self._serial_connection.send_command("P" + chr(4) + chr(17) +
+        if response != "#":
+            print("Calibration failed.")
+        response = self._serial_connection.communicate("P" + chr(4) + chr(17) +
                                          chr(4) + chr(0) + chr(0) +
                                          chr(0) + chr(0))  # manufacturer command to set current elevation as 0
+        if response != "#":
+            print("Calibration failed.")
+        sleep(0.2)
 
     def goto_az_el(self, azimuth: float, elevation: float):
         hex_azimuth = hex(round(azimuth * (16777216 / 360)))[2:]  # from datasheet, also ignore '0x'
