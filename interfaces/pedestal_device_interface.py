@@ -63,7 +63,7 @@ class IPedestalDevice(ABC):
         pass
 
     @abstractmethod
-    def set_location(self, latitude: float, lat_dir: chr, longitude: float, long_dir: chr) -> None:
+    def set_location(self, latitude: float, longitude: float, altitude) -> None:
         pass
 
     @abstractmethod

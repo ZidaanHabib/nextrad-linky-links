@@ -34,14 +34,19 @@ class AZEQ6Pedestal(IPedestalDevice):
         self._location: GPSLocation = gps_client.get_location()
         self._altitude: float = gps_client.get_altitude()
 
-        self._az_limits: [float] = [float(self._cf["Constraints"]["MinAzimuth"]), float(self._cf["Constraints"]["MaxAzimuth"])]
-        self._el_limits: [float] = [float(self._cf["Constraints"]["MinElevation"]), float(self._cf["Constraints"]["MaxElevation"])]
+
         self._slew_rate_limit: float = float(self._cf["Constraints"]["MaxSlewRate"])
 
         self._slew_rate = 150.0  #arcsec/sec
         self._slew_preset = 9
 
         self._moving = False
+
+    def initialise_axes_limits(self):
+        self._az_limits: [float] = [float(self._cf["Constraints"]["MinAzimuth"]),
+                                    float(self._cf["Constraints"]["MaxAzimuth"])]
+        self._el_limits: [float] = [float(self._cf["Constraints"]["MinElevation"]),
+                                    float(self._cf["Constraints"]["MaxElevation"])]
 
     def calibrate(self):
         """ Set current azimuth and elevation to be the 0,0 point"""
@@ -232,9 +237,9 @@ class AZEQ6Pedestal(IPedestalDevice):
     def set_moving(self, status: bool):
         self._moving = status
 
-    def set_location(self, latitude: float, lat_dir: chr, longitude: float, long_dir: chr) -> None:
+    def set_location(self, latitude: float, longitude: float, altitude: float) -> None:
         """ Manually set location if GPS device not functioning correctly"""
-        self._location = GPSLocation(latitude, lat_dir, longitude, long_dir)  #TODO fix type
+        self._location = GPSLocation(latitude, longitude, altitude)
 
     def set_altitude(self, altitude: float) -> None:
         """ Manually set altitude if GPS device not functioning correctly"""
