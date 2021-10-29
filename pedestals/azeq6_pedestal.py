@@ -34,7 +34,9 @@ class AZEQ6Pedestal(IPedestalDevice):
         self._location: GPSLocation = gps_client.get_location()
         self._altitude: float = gps_client.get_altitude()
 
-
+        self._az_limits = []
+        self._el_limits = []
+        self.initialise_axes_limits()
         self._slew_rate_limit: float = float(self._cf["Constraints"]["MaxSlewRate"])
 
         self._slew_rate = 150.0  #arcsec/sec
@@ -43,10 +45,16 @@ class AZEQ6Pedestal(IPedestalDevice):
         self._moving = False
 
     def initialise_axes_limits(self):
+        """Read limits from config file, and check if they are negative"""
         self._az_limits: [float] = [float(self._cf["Constraints"]["MinAzimuth"]),
                                     float(self._cf["Constraints"]["MaxAzimuth"])]
         self._el_limits: [float] = [float(self._cf["Constraints"]["MinElevation"]),
                                     float(self._cf["Constraints"]["MaxElevation"])]
+        for i in range(2):
+            if self._az_limits[i] < 0:
+                self._az_limits[i] = 360 - self._az_limits[i]
+            if self._el_limits[i] < 0:
+                self._el_limits[i] = 360 - self._el_limits[i]
 
     def calibrate(self):
         """ Set current azimuth and elevation to be the 0,0 point"""
