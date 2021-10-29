@@ -52,9 +52,9 @@ class AZEQ6Pedestal(IPedestalDevice):
                                     float(self._cf["Constraints"]["MaxElevation"])]
         for i in range(2):
             if self._az_limits[i] < 0:
-                self._az_limits[i] = 360 - self._az_limits[i]
+                self._az_limits[i] = self._az_limits[i] + 360
             if self._el_limits[i] < 0:
-                self._el_limits[i] = 360 - self._el_limits[i]
+                self._el_limits[i] = self._el_limits[i] + 360
 
     def calibrate(self):
         """ Set current azimuth and elevation to be the 0,0 point"""
@@ -68,7 +68,10 @@ class AZEQ6Pedestal(IPedestalDevice):
         if elevation < 0:
             while elevation < 0:
                 elevation += 360
-        self._serial_client.goto_az_el(azimuth, elevation)
+        if azimuth not in self._az_limits or elevation not in self._az_limits:
+            print("Target position out of specified limits.")
+        else:
+            self._serial_client.goto_az_el(azimuth, elevation)
 
     def slew_to_location(self, target_lat, target_long, target_altitude):
         """ Method to slew to a target location entered in latitude and longitude"""
@@ -257,7 +260,7 @@ class AZEQ6Pedestal(IPedestalDevice):
         """ Set azimuth limits for pedestal and convert to pedestals coordinate system"""
         for i in range(2):
             if az_limits[i] < 0:
-                az_limits[i] = 360 - az_limits[i]
+                az_limits[i] = az_limits[i] + 360
         self._az_limits = az_limits
         #self._cf["Constraints"]["MinAzimuth"] = str(az_limit[0])
         #self._cf["Constraints"]["MinAzimuth"] = str(az_limit[1])
@@ -267,7 +270,7 @@ class AZEQ6Pedestal(IPedestalDevice):
         """ Set elevation limits for pedestal and convert to pedestals coordinate system"""
         for i in range(2):
             if el_limits[i] < 0:
-                el_limits[i] = 360 - el_limits[i]
+                el_limits[i] = el_limits[i] + 360
         self._el_limits = el_limits
         # self.update_config_file()  # write changes back to config file
 
