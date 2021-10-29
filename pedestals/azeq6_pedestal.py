@@ -69,8 +69,10 @@ class AZEQ6Pedestal(IPedestalDevice):
         azimuth_diff = ControllerMath.determine_azimuth_difference(src_lat, src_long, target_lat, target_long)
 
         #  now we need to account for where the pedestal is already pointing:
-        azimuth_final = 360 - (azimuth_diff + self._az_offset)
-        elevation_final = 360 - (elevation_diff + self._el_offset)
+        """azimuth_final = 360 - (azimuth_diff + self._az_offset)
+        elevation_final = 360 - (elevation_diff + self._el_offset)"""
+        azimuth_final = azimuth_diff - self._az_offset
+        elevation_final = elevation_diff - self._el_offset
 
         self.slew_to_az_el(round(azimuth_final), round(elevation_final))  # move
 
@@ -238,15 +240,21 @@ class AZEQ6Pedestal(IPedestalDevice):
         """ Manually set altitude if GPS device not functioning correctly"""
         self._altitude = altitude
 
-    def set_az_limits(self, az_limit: [float]) -> None:
-        """ Set azimuth limits for pedestal"""
-        self._az_limits = az_limit
+    def set_az_limits(self, az_limits: [float]) -> None:
+        """ Set azimuth limits for pedestal and convert to pedestals coordinate system"""
+        for i in range(2):
+            if az_limits[i] < 0:
+                az_limits[i] = 360 - az_limits[i]
+        self._az_limits = az_limits
         #self._cf["Constraints"]["MinAzimuth"] = str(az_limit[0])
         #self._cf["Constraints"]["MinAzimuth"] = str(az_limit[1])
         # self.update_config_file()  # write changes back to config file
 
     def set_el_limits(self, el_limits: [float]) -> None:
-        """ Set elevation limits for pedestal"""
+        """ Set elevation limits for pedestal and convert to pedestals coordinate system"""
+        for i in range(2):
+            if el_limits[i] < 0:
+                el_limits[i] = 360 - el_limits[i]
         self._el_limits = el_limits
         # self.update_config_file()  # write changes back to config file
 
@@ -259,6 +267,9 @@ class AZEQ6Pedestal(IPedestalDevice):
 
     def set_slew_preset(self, preset):
         self._slew_preset = preset
+
+    def set_true_north_offset(self, offset):
+        self._az_offset = offset
 
 
 if __name__ == "__main__":
