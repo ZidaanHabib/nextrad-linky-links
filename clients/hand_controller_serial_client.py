@@ -52,58 +52,38 @@ class SynscanSerialClient(IControllerInterface):
 
         return moving
 
-    def slew_positive_fixed(self, axis, preset):  #axis == 1: azimuth, 2: elevation
-        axis_char = ""
+    def slew_fixed(self, axis, preset, dir):  #axis == 1: azimuth, 2: elevation
         if axis == 1:
             axis_char = chr(16)
         else:  # axis = 2
             axis_char = chr(17)
-        msg: str = "P" + chr(2) + axis_char + chr(36) + chr(preset) + chr(0) * 3
-        self._serial_connection.communicate(msg)
+        dir_char = ""
+        if dir == 1:
+            dir_char = chr(36)
+        else:
+            dir_char = chr(37)
+        msg: str = "P" + chr(2) + axis_char + dir_char + chr(preset) + chr(0) * 3
+        response = self._serial_connection.communicate(msg)
 
-    def slew_negative_fixed(self, axis: int, preset: int):
-        axis_char = ""
-        if axis == 1:
-            axis_char = chr(16)
-        else:  # axis = 2
-            axis_char = chr(17)
-        msg: str = "P" + chr(2) + axis_char + chr(37) + chr(preset) + chr(0) * 3
-        self._serial_connection.send_command(msg)
 
-    def slew_positive_specific(self, axis: chr, slew_rate: float, azimuth_diff, elevation_diff ):  # rate is in arcseconds per sec
+    def slew(self, axis: int, slew_rate: float, dir: int):  # rate is in arcseconds per sec
         """Slew in positive direction at a specific rate in arcseconds per sec"""
         slew_rate_whole = int((slew_rate * 4) // 256)
         slew_rate_rem = int((slew_rate * 4) % 256)
         axis_char = ""
-        wait = 0
         if axis == 1:  # azimuth axis
             axis_char = chr(16)
-            wait = azimuth_diff / (slew_rate / 3600)  # 1 arcsec/sec = 0.000277778  degrees/sec
         else:  # axis = 2  , elevation axis
             axis_char = chr(17)
-            wait = elevation_diff / (slew_rate / 3600)
-        cmd = "P" + chr(3) + axis_char + chr(6) + chr(slew_rate_whole) + chr(slew_rate_rem) + chr(0) * 2
-        print(wait)
+        dir_char = ""
+        if dir == 1:
+            dir_char = chr(6)
+        else:
+            dir_char = chr(7)
+        cmd = "P" + chr(3) + axis_char + dir_char + chr(slew_rate_whole) + chr(slew_rate_rem) + chr(0) * 2
         response = self._serial_connection.communicate(cmd)
-        time.sleep(wait)
-        self.stop_slew(axis)
 
 
-    def slew_negative_specific(self, axis: chr, slew_rate: float,  azimuth_diff, elevation_diff ):  # rate is in arcseconds per sec
-        """Slew in negative direction at a specific rate in arcseconds per sec"""
-        slew_rate_whole = int((slew_rate * 4) // 256)
-        slew_rate_rem = int((slew_rate * 4) % 256)
-        axis_char = ""
-        wait = 0
-        if axis == 1:  # azimuth axis
-            axis_char = chr(16)
-            wait = azimuth_diff / (slew_rate * 0.000277778)  # 1 arcsec/sec = 0.000277778  degrees/sec
-        else:  # axis = 2  , elevation axis
-            axis_char = chr(17)
-            wait = elevation_diff / (slew_rate * 0.000277778)
-        cmd = "P" + chr(3) + axis_char + chr(7) + chr(slew_rate_whole) + chr(slew_rate_rem) + chr(0) * 2
-        time.sleep(wait)
-        self.stop_slew(axis)
 
     def stop_slew(self, axis):
         axis_char = ""

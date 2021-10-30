@@ -14,19 +14,11 @@ class IControllerInterface(ABC):
         pass
 
     @abstractmethod
-    def slew_positive_fixed(self, axis, preset):  #axis == 1: azimuth, 2: elevation
+    def slew_fixed(self, axis: chr, preset: int, dir: chr):  #axis == 1: azimuth, 2: elevation
         pass
 
     @abstractmethod
-    def slew_negative_fixed(self, axis: int, preset: int):
-        pass
-
-    @abstractmethod
-    def slew_positive_specific(self, axis: chr, slew_rate: float, azimuth_diff, elevation_diff ):  # rate is in arcseconds per sec
-        pass
-
-    @abstractmethod
-    def slew_negative_specific(self, axis: chr, slew_rate: float,  azimuth_diff, elevation_diff ):  # rate is in arcseconds per sec
+    def slew(self, axis: chr, slew_rate: float, dir: chr):  # rate is in arcseconds per sec
         pass
 
     @abstractmethod
@@ -38,9 +30,9 @@ class IControllerInterface(ABC):
         pass
 
     @abstractmethod
-    def get_azimuth(self) -> str:
+    def get_azimuth(self) :
         pass
 
     @abstractmethod
-    def get_elevation(self) -> str:
+    def get_elevation(self) :
         pass

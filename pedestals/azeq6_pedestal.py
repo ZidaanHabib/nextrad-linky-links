@@ -1,4 +1,6 @@
 """Interfaces:"""
+import threading
+
 from interfaces.pedestal_device_interface import IPedestalDevice
 from interfaces.connection_interface import ConnectionInterface
 from interfaces.controller_interface import IControllerInterface
@@ -39,7 +41,7 @@ class AZEQ6Pedestal(IPedestalDevice):
         self.initialise_axes_limits()
         self._slew_rate_limit: float = float(self._cf["Constraints"]["MaxSlewRate"])
 
-        self._slew_rate = 3   #degrees/sec
+        self._slew_rate = 5   #degrees/sec
         self._slew_preset = 9
 
         self._moving = False
@@ -92,50 +94,41 @@ class AZEQ6Pedestal(IPedestalDevice):
 
         self.slew_to_az_el(round(azimuth_final), round(elevation_final))  # move
 
-    def slew_positive_specific(self, axis: int):
+    def slew_thread(self, axis: int, dir: int):  # threaded method
+
+        if axis == 1:
+            current_position = self.get_azimuth()
+            final_position = self._az_limits[1]
+        else:
+            current_position = self.get_elevation()
+            final_position = self._el_limits[1]
+        diff = abs(current_position - final_position)
+        wait = diff / self._slew_rate  # gives the number of seconds to delay before stopping slew
+        slew_rate = self._slew_rate*3600  # convert degrees/sec to arcsec/sec
+        self._serial_client.slew(axis, slew_rate, dir)
+        time.sleep(wait)
+        if self.is_moving():
+            self.stop_slew(axis)
+        else:
+            pass
+
+    def slew(self, axis, dir):
         if self.is_moving():  # make sure pedestal not already moving
             self.stop_slew(axis)  # stop pedestal if already moving
+
+        slew_thread = threading.Thread(target=self.slew_thread, args=[axis, dir])
+        slew_thread.daemon = True
+
         self.set_moving(True)
+        slew_thread.start()
 
-        #slew_rate = rate if rate <= self._slew_rate_limit else self._slew_rate_limit
 
-        azimuth_diff = abs(self.get_azimuth() - self._az_limits[1])
-        if azimuth_diff > 180:
-            azimuth_diff = 360 - azimuth_diff
-        elevation_diff = abs(self.get_elevation() - self._el_limits[1])
-        if elevation_diff > 180:
-            elevation_diff = 360 - elevation_diff
-        slew_rate = self._slew_rate*3600  # convert degrees/sec to arcsec/sec
-        self._serial_client.slew_positive_specific(axis, slew_rate, azimuth_diff, elevation_diff)
-
-    def slew_positive_preset(self, axis):  #axis == 1: azimuth, 2: elevation
+    def slew_preset(self, axis, dir):  #axis == 1: azimuth, 2: elevation
         if self._moving:  # make sure pedestal not already moving
             self.stop_slew(axis)  # stop pedestal if already moving
         self.set_moving(True)
-        self._serial_client.slew_positive_fixed(axis, self._slew_preset)
+        self._serial_client.slew_fixed(axis, self._slew_preset, dir)
 
-    def slew_negative_preset(self, axis: int):
-        if self.is_moving():  # make sure pedestal not already moving
-            self.stop_slew(axis)  # stop pedestal if already moving
-        self.set_moving(True)
-        self._serial_client.slew_negative_fixed(axis, self._slew_preset)
-
-    def slew_negative_specific(self, axis: int):
-        if self.is_moving():  # make sure pedestal not already moving
-            self.stop_slew(axis)  # stop pedestal if already moving
-        self.set_moving(True)
-
-        slew_rate = rate if rate <= self._slew_rate_limit else self._slew_rate_limit
-
-        azimuth_diff = abs(self.get_azimuth() - self._az_limits[1])
-        if azimuth_diff > 180:
-            azimuth_diff = 360 - azimuth_diff
-
-        elevation_diff = abs(self.get_elevation() - self._el_limits[1])
-        if elevation_diff > 180:
-            elevation_diff = 360 - elevation_diff
-
-        self._serial_client.slew_negative_specific(axis, slew_rate, azimuth_diff, elevation_diff)
 
     def stop_slew(self, axis: int):
         self.set_moving(False)
@@ -161,15 +154,11 @@ class AZEQ6Pedestal(IPedestalDevice):
             self.slew_to_az_el(self._az_limits[1], elevation)
 
     def sweep_off(self):
-        """global stop_sweep
-        stop_sweep = True  # stop sweep thread"""
         self.stop_slew(1)
         self.stop_slew(2)
         self.set_moving(False)
 
     def sweep_on(self):
-        #global stop_sweep
-        #stop_sweep = False
         self._moving = True
         sweep_thread = Thread(target=self.sweep_thread)
         sweep_thread.daemon = True
