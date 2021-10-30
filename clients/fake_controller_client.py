@@ -17,25 +17,25 @@ class FakeControllerClient(IControllerInterface):
     def is_goto(self):
         print("is goto in action ")
 
-    def slew_positive_fixed(self, axis, preset):  #axis == 1: azimuth, 2: elevation
+    def slew_fixed(self, axis, preset, dir):  #axis == 1: azimuth, 2: elevation
         print("slew positive fixed command")
 
-    def slew_negative_fixed(self, axis: int, preset: int):
-        print("slew negative fixed command")
 
-    def slew_positive_specific(self, axis: chr, slew_rate: float, azimuth_diff, elevation_diff ):  # rate is in arcseconds per sec
-        print("slew positive specific")
-
-
-    def slew_negative_specific(self, axis: chr, slew_rate: float,  azimuth_diff, elevation_diff ):  # rate is in arcseconds per sec
-        print("stop negative specific")
+    def slew(self, axis: chr, slew_rate: float, dir: chr):  # rate is in arcseconds per sec
+        print("slewing positive specific")
 
     def stop_slew(self, axis):
-        print("stop slew command")
+        print("Stop slew")
+
+    def slew_step(self, axis, direction, slew_rate):
+        print("Slewing 1 degree")
 
 
-    def get_azimuth(self) -> str:
+    def get_azimuth(self) :
         print("get azimuth")
+        return "000000"
 
-    def get_elevation(self) -> str:
+
+    def get_elevation(self) :
         print("get elevation")
+        return "000000"
