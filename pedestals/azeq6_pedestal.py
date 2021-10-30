@@ -120,7 +120,7 @@ class AZEQ6Pedestal(IPedestalDevice):
         self.set_moving(True)
         self._serial_client.slew_negative_fixed(axis, self._slew_preset)
 
-    def slew_negative_specific(self, axis: int, rate: float):
+    def slew_negative_specific(self, axis: int):
         if self.is_moving():  # make sure pedestal not already moving
             self.stop_slew(axis)  # stop pedestal if already moving
         self.set_moving(True)
