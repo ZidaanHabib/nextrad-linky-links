@@ -37,11 +37,11 @@ class IPedestalDevice(ABC):
         pass
 
     @abstractmethod
-    def slew_positive_specific(self, axis, rate):
+    def slew_positive_specific(self, axis):
         pass
 
     @abstractmethod
-    def slew_negative_specific(self, axis, rate):
+    def slew_negative_specific(self, axis):
         pass
 
     @abstractmethod
