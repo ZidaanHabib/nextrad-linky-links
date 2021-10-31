@@ -6,5 +6,5 @@ class Button:
     def __init__(self, command: ICommand):
         self.command = command
 
-    def press(self):
-        self.command.execute()
+    def press(self, *args):
+        self.command.execute(*args)

@@ -56,27 +56,32 @@ class StartSlewPreset(ICommand):
     def execute(self):
         self.pedestal_device.stop_slew(self.axis)
 
+class StartSlew(ICommand):
+
+    def __init__(self, pedestal_device: IPedestalDevice):
+        self.pedestal_device = pedestal_device
+
+
+    def execute(self, axis, direction):
+        self.pedestal_device.slew(axis, direction)
+
 
 class GoToLocation(ICommand):
 
-    def __init__(self, pedestal_device: IPedestalDevice, lat, long):
+    def __init__(self, pedestal_device: IPedestalDevice):
         self.pedestal_device = pedestal_device
-        self.lat = lat
-        self.long = long
 
-    def execute(self):
-        self.pedestal_device.slew_to_location(self.lat, self.long)
+    def execute(self, lat, long, alt):
+        self.pedestal_device.slew_to_location(lat, long, alt)
 
 
 class GoToAzEl(ICommand):
 
-    def __init__(self, pedestal_device: IPedestalDevice, az, el):
+    def __init__(self, pedestal_device: IPedestalDevice):
         self.pedestal_device = pedestal_device
-        self.az = az
-        self.el = el
 
-    def execute(self):
-        self.pedestal_device.slew_to_az_el(self.az, self.el)
+    def execute(self, az, el):
+        self.pedestal_device.slew_to_az_el(az, el)
 
 
 class GetOrientation(ICommand):
