@@ -70,7 +70,7 @@ class AZEQ6Pedestal(IPedestalDevice):
         if elevation < 0:
             while elevation < 0:
                 elevation += 360
-        if azimuth not in self._az_limits or elevation not in self._az_limits:
+        if azimuth in range (int(self._az_limits[0]), int(self._az_limits[1])) or elevation in range(int(self._el_limits[0]), int(self._el_limits[1])):
             print("Target position out of specified limits.")
         else:
             self._serial_client.goto_az_el(azimuth, elevation)
