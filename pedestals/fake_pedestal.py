@@ -10,14 +10,11 @@ class FakePedestal(IPedestalDevice): #TODO add IPedestalDevice inheritance
         """ Method to slew to a target location entered in latitude and longitude"""
         print("Slewing to lcoation")
 
-    def slew_positive_specific(self, axis: int, rate: float):
+    def slew(self, axis: chr, dir: chr):
         print("Slew positive specific")
 
-    def slew_positive_preset(self, axis):  #axis == 1: azimuth, 2: elevation
+    def slew_preset(self, axis, dir):  #axis == 1: azimuth, 2: elevation
         print("Slew positive preset")
-
-    def slew_negative_preset(self, axis: int):
-        print("Slew negative preset")
 
     def stop_slew(self, axis: int):
         print("Stopping slew")
@@ -42,36 +39,34 @@ class FakePedestal(IPedestalDevice): #TODO add IPedestalDevice inheritance
         print("sweep on")
 
     """Setter methods"""
-    def set_moving(self):
+    def set_moving(self, status):
         print("moving")
 
     """Setter methods: """
 
-    def set_location(self) :
+    def set_location(self, lat, long, alt) :
         print("location")
 
-    def set_altitude(self) :
+    def set_altitude(self, alt) :
         print("altitude")
 
-    def set_az_limits(self) -> None:
+    def set_az_limits(self, limits: [int]) -> None:
         print("Set az limits")
 
-    def set_el_limits(self) -> None:
+    def set_el_limits(self, limits: [int]) -> None:
         print("Set el limits")
 
 
-    def set_slew_rate_limit(self) -> None:
+    def set_slew_rate_limit(self, slew_rate) -> None:
         print("slew rate limit")
 
     """Getter methods:"""
 
-    def slew_negative_specific(self, axis, rate):
-        print("slew negative specific")
 
-    def set_slew_rate(self):
+    def set_slew_rate(self, slew_rate):
         print("Set slew rate")
 
-    def set_slew_preset(self):
+    def set_slew_preset(self, preset):
         print("Set slew preset")
 
     def get_location_str(self):
