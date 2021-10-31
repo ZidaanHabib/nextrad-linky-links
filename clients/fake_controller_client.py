@@ -12,7 +12,7 @@ class FakeControllerClient(IControllerInterface):
         print("calibrating")  # manufacturer command to set current elevation as 0
 
     def goto_az_el(self, azimuth: float, elevation: float):
-        print("goto command")
+        print("going to Az:{} , El:{}".format(azimuth, elevation))
 
     def is_goto(self):
         print("is goto in action ")
