@@ -112,3 +112,7 @@ class IPedestalDevice(ABC):
     @abstractmethod
     def get_horizontal_offset(self):
         pass
+
+    @abstractmethod
+    def toggle_debug_mode(self):
+        pass

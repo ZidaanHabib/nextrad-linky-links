@@ -93,3 +93,6 @@ class FakePedestal(IPedestalDevice): #TODO add IPedestalDevice inheritance
 
     def get_horizontal_offset(self):
         print("Get h offset")
+
+    def toggle_debug_mode(self):
+        print("debug")

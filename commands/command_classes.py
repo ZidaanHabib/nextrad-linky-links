@@ -95,3 +95,11 @@ class GetOrientation(ICommand):
         return az, el
 
 
+class ToggleDebug(ICommand):
+
+    def __init__(self, pedestal_device: IPedestalDevice):
+        self.pedestal_device = pedestal_device
+
+    def execute(self):
+        self.pedestal_device.toggle_debug_mode()
+

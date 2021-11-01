@@ -45,6 +45,7 @@ class AZEQ6Pedestal(IPedestalDevice):
         self._slew_preset = 9
 
         self._moving = False
+        self._DEBUG = False
 
     def initialise_axes_limits(self):
         """Read limits from config file, and check if they are negative"""
@@ -275,6 +276,8 @@ class AZEQ6Pedestal(IPedestalDevice):
     def set_true_north_offset(self, offset):
         self._az_offset = offset
 
+    def toggle_debug_mode(self):
+        self._DEBUG = True
 
 if __name__ == "__main__":
 

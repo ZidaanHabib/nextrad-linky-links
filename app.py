@@ -8,6 +8,7 @@ from commands.button import Button
 from remotes.azeq6_remote import AZEQ6PedestalRemote
 from remotes.fake_pedestal_remote import FakePedestalRemote
 #from commands.message_parser import MessageParser
+import argparse
 
 
 """ MQTT call backs:"""
@@ -16,7 +17,7 @@ def on_connect(client, userdata, flags, rc):
         print("Connection OK.")
     else:
         print("Connection failed with response code " + str(rc))
-    client.subscribe("test")
+    client.subscribe("Pi-1")
 
 
 def on_log(client, userdata, level, buf):
@@ -38,6 +39,10 @@ def on_message(client, userdata, msg_enc):
 
 """ Creating commands:"""
 def commands_init(pedestal_device):
+    debug_command = command_classes.ToggleDebug(pedestal_device)
+    global debug_pressed
+    debug_pressed = Button(debug_command)
+
     stop_command = command_classes.StopSlew(pedestal_device)
     global stop_pressed
     stop_pressed = Button(stop_command)
@@ -54,8 +59,6 @@ def commands_init(pedestal_device):
     slew_command = command_classes.StartSlew(pedestal_device)
     global slew_pressed
     slew_pressed = Button(slew_command)
-
-
 
     get_coords_command = command_classes.GetOrientation(pedestal_device)
     global get_coords_pressed
@@ -88,7 +91,7 @@ def select_button(msg):
             axis = 2
         if msg_list[2] == "POS":
             dir = 1
-        else:
+        else: # msg_list[2] = "NEG"
             dir = 2
         slew_pressed.press(axis, dir)
     elif msg_list[0] == mqtt_cmds["goto_az_el"]:
@@ -99,7 +102,7 @@ def select_button(msg):
         lat = float(msg_list[1])
         long = float(msg_list[2])
         alt = float(msg_list[3])
-        goto_location_pressed.press(lat, long)
+        goto_location_pressed.press(lat, long, alt)
     elif msg_list[0] == mqtt_cmds["sweep"]:
         sweep_pressed.press()
 
@@ -111,11 +114,11 @@ def main():
     #pc = FakePedestalRemote.get_pedestal_device()
     pc = AZEQ6PedestalRemote.get_fake_pedestal_device()
     commands_init(pc)
-    """# bind commands to buttons as per command design pattern.
-    command = command_classes.Test(pc)
-    test_button = Button(command)
-    test_button.press()"""
-    #mp = MessageParser()
+
+
+    if args.debug_flag:
+        debug_pressed.press()  # check if debug mode entered
+        print("--Debug Mode Active--")
 
     cf = ConfigParser()
     cf.read("config.ini")
@@ -134,7 +137,7 @@ def main():
     #pc = PedestalController(FakeControllerClient(), FakeGPSClient())
     try:
         #client.connect(host="localhost", port=1883)
-        client.connect(host="169.254.228.235", port=1883)
+        client.connect(host="localhost", port=1883) # "169.254.228.235"
     except Exception as e:
         print(e)
     #client.connect(host="mqtt.eclipseprojects.io", port=1883, keepalive=60, keepalive=60)
@@ -150,6 +153,15 @@ def main():
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        '--debug',
+        action='store_true',
+        dest="debug_flag",
+        help='toggle debug mode'
+    )
+    args = parser.parse_args()
+
     main()
 
 
