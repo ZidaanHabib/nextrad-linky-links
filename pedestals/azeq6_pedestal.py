@@ -96,13 +96,19 @@ class AZEQ6Pedestal(IPedestalDevice):
         self.slew_to_az_el(round(azimuth_final), round(elevation_final))  # move
 
     def slew_thread(self, axis: int, dir: int):  # threaded method
-
+        """ Threaded method to slew until limit is reached """
         if axis == 1:
             current_position = self.get_azimuth()
-            final_position = self._az_limits[1]
+            if dir == 1:
+                final_position = self._az_limits[1]
+            else:
+                final_position = self._az_limits[0]
         else:
             current_position = self.get_elevation()
-            final_position = self._el_limits[1]
+            if dir == 1:
+                final_position = self._el_limits[1]
+            else:
+                final_position = self._el_limits[0]
         diff = abs(current_position - final_position)
         wait = diff / self._slew_rate  # gives the number of seconds to delay before stopping slew
         slew_rate = self._slew_rate*3600  # convert degrees/sec to arcsec/sec
@@ -114,6 +120,7 @@ class AZEQ6Pedestal(IPedestalDevice):
             pass
 
     def slew(self, axis, dir):
+        """ Starts the slew thread"""
         if self.is_moving():  # make sure pedestal not already moving
             self.stop_slew(axis)  # stop pedestal if already moving
 
