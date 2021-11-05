@@ -2,9 +2,10 @@ import pynmea2 as nmea
 import serial
 from time import sleep
 from dtypes.gps_location import GPSLocation
+from interfaces.gps_interface import IGPSInterface
 
 
-class GPSClient:
+class GPSClient(IGPSInterface):
 
     def __init__(self, baud_rate=9600, timeout=5):
         self.baud_rate = baud_rate
