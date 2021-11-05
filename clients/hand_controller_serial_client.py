@@ -14,7 +14,8 @@ class SynscanSerialClient(IControllerInterface):
         self._serial_connection = connection
 
     def calibrate_command(self):
-        self.set_tracking(1)  # set to alt-az mode
+        """ Send calibration string to pedestal """
+        self.set_tracking(1)  # set pedestal to to alt-az mode
         response = self._serial_connection.communicate("P" + chr(4) + chr(16) +
                                          chr(4) + chr(0) + chr(0) +
                                          chr(0) + chr(0))  # manufacturer command to set current azimuth as 0
@@ -28,6 +29,7 @@ class SynscanSerialClient(IControllerInterface):
         sleep(0.2)
 
     def goto_az_el(self, azimuth: float, elevation: float):
+        """ Send GoTo command to pedestal"""
         hex_azimuth = hex(round(azimuth * (16777216 / 360)))[2:]  # from datasheet, also ignore '0x'
         hex_elevation = hex(round(elevation * (16777216 / 360)))[2:]
         hex_elevation = hex_elevation.upper()  # convert to uppercase
