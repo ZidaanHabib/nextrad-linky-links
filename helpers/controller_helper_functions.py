@@ -16,8 +16,8 @@ class ControllerMath:
         delta_lat = abs(source_lat - target_lat)
         delta_long = abs(source_long - target_long)
 
-        distance = 2*ControllerMath.RADIUS_EARTH*asin(sqrt(sin(delta_lat/2)**2  + cos(source_lat)*cos(target_lat)
-                                                    *sin(delta_long/2)**2 ))
+        distance = 2*ControllerMath.RADIUS_EARTH*asin(sqrt(sin(delta_lat/2)**2  +
+                                                           cos(source_lat)*cos(target_lat)*sin(delta_long/2)**2 ))
 
         return distance
 
@@ -32,7 +32,8 @@ class ControllerMath:
         delta_lat = source_lat - target_lat
         delta_long = target_long - source_long
 
-        azimuth = atan2((cos(target_lat)*sin(delta_long)),(cos(source_lat)*sin(target_lat) - sin(source_lat)*cos(target_lat)*cos(delta_long)))
+        azimuth = atan2((cos(target_lat)*sin(delta_long)), (cos(source_lat)*sin(target_lat) -
+                                                            sin(source_lat)*cos(target_lat)*cos(delta_long)))
         azimuth_degrees = degrees(azimuth) # add 180 degrees to reverse from source to dest
         return round(azimuth_degrees,2)
 
@@ -46,6 +47,7 @@ class ControllerMath:
 
 
 if __name__ == "__main__":
-    print(ControllerMath.determine_azimuth_difference(-33.9586853, 18.4601156, -33.95898249833889, 18.470658926566475))  # output is correct
+    print(ControllerMath.determine_azimuth_difference(-33.9586853, 18.4601156, -33.95898249833889,
+                                                      18.470658926566475))  # output is correct
     #print(ControllerMath.determine_elevation_difference(88, 15, 973))  # output is correct @ 4.29
     #TODO check if pedestal rotates the long way around when moving to the (360 - 4.29)
