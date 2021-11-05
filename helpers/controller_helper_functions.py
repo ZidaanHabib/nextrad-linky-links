@@ -35,6 +35,8 @@ class ControllerMath:
         azimuth = atan2((cos(target_lat)*sin(delta_long)), (cos(source_lat)*sin(target_lat) -
                                                             sin(source_lat)*cos(target_lat)*cos(delta_long)))
         azimuth_degrees = degrees(azimuth) # add 180 degrees to reverse from source to dest
+        if azimuth_degrees < 0:
+            azimuth_degrees += 360
         return round(azimuth_degrees,2)
 
     @staticmethod
@@ -47,7 +49,12 @@ class ControllerMath:
 
 
 if __name__ == "__main__":
-    print(ControllerMath.determine_azimuth_difference(-33.9586853, 18.4601156, -33.95898249833889,
-                                                      18.470658926566475))  # output is correct
+    #print(ControllerMath.determine_azimuth_difference(-33.9586853, 18.4601156, -33.95898249833889,
+     #                                                 18.470658926566475))  # output is correct
     #print(ControllerMath.determine_elevation_difference(88, 15, 973))  # output is correct @ 4.29
     #TODO check if pedestal rotates the long way around when moving to the (360 - 4.29)
+    source_lat, source_long = -33.908109924189084, 18.395487481680284  # Twin towers
+    target_lat, target_long = -33.90625351007551, 18.394488341295258
+    distance = ControllerMath.haversine(source_lat, source_long, target_lat, target_long)
+    az = ControllerMath.determine_azimuth_difference(source_lat, source_long, target_lat, target_long)
+    print(az)
