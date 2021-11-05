@@ -3,7 +3,7 @@ import time
 
 def loop():
     global stop
-    while not stop:
+    while not stop and :
         print("hello")
         time.sleep(0.5)
 
