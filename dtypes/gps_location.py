@@ -16,17 +16,10 @@ class GPSLocation:
         """ Method to get latitude"""
         return self._latitude
 
-    #def get_lat_direction(self):
-        """ Method to get latitude direction"""
-       # return self._lat_direction
 
     def get_longitude(self):
         """ Method to get longitude"""
         return self._longitude
-
-    #def get_long_direction(self):
-        """ Method to get longitude direction"""
-      #  return self._long_direction
 
     def __repr__(self):
         """location_string = str(self._latitude) + ", " + self._lat_direction \
