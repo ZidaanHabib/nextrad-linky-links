@@ -3,96 +3,118 @@ from interfaces.pedestal_device_interface import IPedestalDevice
 class FakePedestal(IPedestalDevice): #TODO add IPedestalDevice inheritance
 
     def calibrate(self):
-        """ Set current azimuth and elevation to be the 0,0 point"""
+        """ Fake calibration command"""
         print("Calibrating")
 
     def slew_to_location(self, target_lat, target_long, target_altitude):
-        """ Method to slew to a target location entered in latitude and longitude"""
-        print("Slewing to lcoation")
+        """ Fake goto command"""
+        print("Slewing to lcoation from FakePedestal ")
 
     def slew(self, axis: chr, dir: chr):
-        print("Slew positive specific")
+        """ Fake slew command"""
+        print("Slew from FakePedestal ")
 
     def slew_preset(self, axis, dir):  #axis == 1: azimuth, 2: elevation
+        """ Fake slew preset command"""
         print("Slew positive preset")
 
     def stop_slew(self, axis: int):
-        print("Stopping slew")
+        """ Fake stop command"""
+        print("Stop slew cmd from FakePedestal")
 
     def slew_to_az_el(self, azimuth: float, elevation: float):
-        print("Slew to azimuth and elevation")
+        """ Fake goto command"""
+        print("Slew to azimuth and elevation FakePedestal")
 
     def get_azimuth(self):
-        print("Get azimuth")
+        """ Fake get azimuth command"""
+        print("Get azimuth from FakePedestal")
 
     def get_elevation(self):
-        print("Get elev")
+        """ Fake get elevation command"""
+        print("Get elev from FakePedestal")
 
     def is_slew_az_el(self):
-        print("is slewing")
+        """ Fake is slewing command"""
+        print("is slewing FakePedestal")
 
 
     def sweep_off(self):
-        print("sweep off")
+        print("sweep off ")
 
     def sweep_on(self):
-        print("sweep on")
+        """ Fake sweep on command"""
+        print("sweep on from FakePedestal")
 
     """Setter methods"""
     def set_moving(self, status):
-        print("moving")
+        """ Fake set moving command"""
+        print("Set moving from FakePedestal")
 
-    """Setter methods: """
+    def set_location(self, lat, long, alt):
+        """ Fake set location command"""
+        print("location from FakePedestal")
 
-    def set_location(self, lat, long, alt) :
-        print("location")
-
-    def set_altitude(self, alt) :
-        print("altitude")
+    def set_altitude(self, alt):
+        """ Fake set altitude command"""
+        print("Get altitude from FakePedestal")
 
     def set_az_limits(self, limits: [int]) -> None:
+        """ Fake set az limits command """
         print("Set az limits")
 
     def set_el_limits(self, limits: [int]) -> None:
-        print("Set el limits")
+        """ Fake set el limits command"""
+        print("Set el limits from FakePedestal")
 
 
     def set_slew_rate_limit(self, slew_rate) -> None:
-        print("slew rate limit")
+        """ Fake set slew rate command"""
+        print("slew rate limit from FakePedestal")
+
+    def set_slew_rate(self, slew_rate):
+        """ Fake get slew rate command"""
+        print("Set slew rate from FakePedestal")
+
+    def set_slew_preset(self, preset):
+        """ Fake set slew rate command"""
+        print("Set slew preset from FakePedestal")
 
     """Getter methods:"""
 
-
-    def set_slew_rate(self, slew_rate):
-        print("Set slew rate")
-
-    def set_slew_preset(self, preset):
-        print("Set slew preset")
-
     def get_location_str(self):
-        print("location")
+        """ fake get location string command"""
+        print("get location from FakePedestal")
 
     def get_location(self):
+        """ Fake get location string"""
         """Return instance location object """
 
     def get_altitude(self):
-        print("altitude")
+        """ Fake get altitude command"""
+        print(" Get altitude from FakePedestal")
 
     def get_azimuth_limits(self):
-        print("azimuth limits")
+        """ Fake get az limits command"""
+        print("Get azimuth limits from FakePedestal")
 
     def is_moving(self) :
-        print("is moving")
+        """ Fake is moving command"""
+        print("Check if moving from FakePedestal")
 
 
     def get_slew_preset(self):
-        print("slew preset")
+        """ Fake get slew preset command"""
+        print("Get slew preset from FakePedestal")
 
     def get_tn_offset(self):
-        print("get tn offset")
+        """ Fake get true north offset command"""
+        print("Get tn offset from FakePedestal")
 
     def get_horizontal_offset(self):
-        print("Get h offset")
+        """ fake get horizontal offset command"""
+        print("Get h offset from FakePedestal")
 
     def toggle_debug_mode(self):
-        print("debug")
+        """ Fake debug command """
+        print("Toggle debug mode from FakePedestal")
