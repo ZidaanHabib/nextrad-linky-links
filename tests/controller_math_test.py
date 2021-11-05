@@ -41,5 +41,38 @@ def test_dist_az5():
     assert 1280 < distance < 1290
     assert 143 < az < 144
 
-"""if __name__ == "__main__":
-    main()"""
+def test_el1():
+    source_alt = 2
+    target_alt = 0
+    dist = 2
+    el = ControllerMath.determine_elevation_difference(source_alt, target_alt, dist)
+    assert el == 45
+
+def test_el2():
+    source_alt = 4
+    target_alt = 0
+    dist = 2
+    el = ControllerMath.determine_elevation_difference(source_alt, target_alt, dist)
+    assert el == 63.43
+
+def test_el3():
+    source_alt = 100
+    target_alt = 88.5
+    dist = 200
+    el = ControllerMath.determine_elevation_difference(source_alt, target_alt, dist)
+    assert el == 3.29
+
+def test_el3():
+    source_alt = 20
+    target_alt = 20
+    dist = 200
+    el = ControllerMath.determine_elevation_difference(source_alt, target_alt, dist)
+    assert el == 0
+
+def test_el4():
+    source_alt = 0
+    target_alt = 2
+    dist = 2
+    el = ControllerMath.determine_elevation_difference(source_alt, target_alt, dist)
+    assert el == -45
+
