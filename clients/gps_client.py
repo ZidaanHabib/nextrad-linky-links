@@ -81,8 +81,4 @@ class GPSClient:
 
 
 if __name__ == "__main__":
-    lat = '3150.7825'
-    lat_Dir = "N"
-    long = '11711.9405'
-    long_dir = "W"
-    print(GPSClient.format(lat, lat_Dir, long, long_dir))
+    gp = GPSClient()
