@@ -8,7 +8,7 @@ class Test(ICommand):
         self.pedestal_device = pedestal_device
 
     def execute(self):
-        print("Command pattern test successful!!!!!")
+        print("Command pattern tests successful!!!!!")
 
 
 class Calibrate(ICommand):
