@@ -4,6 +4,7 @@ import threading
 from interfaces.pedestal_device_interface import IPedestalDevice
 from interfaces.connection_interface import ConnectionInterface
 from interfaces.controller_interface import IControllerInterface
+from interfaces.gps_interface import IGPSInterface
 """Clients:"""
 from clients.pedestal_controller import PedestalController
 from clients.hand_controller_serial_client import SynscanSerialClient
@@ -15,6 +16,7 @@ from helpers.controller_helper_functions import ControllerMath
 from dtypes.gps_location import GPSLocation
 from configparser import ConfigParser
 import time
+import timeit
 import os
 from threading import Thread
 
@@ -22,7 +24,7 @@ from threading import Thread
 
 class AZEQ6Pedestal(IPedestalDevice):
 
-    def __init__(self, sc: IControllerInterface, gps_client):
+    def __init__(self, sc: IControllerInterface, gps_client:IGPSInterface):
         #  client members:
         self._serial_client = sc
         self._gps_client = gps_client
@@ -78,8 +80,12 @@ class AZEQ6Pedestal(IPedestalDevice):
 
     def slew_to_location(self, target_lat, target_long, target_altitude):
         """ Method to slew to a target location entered in latitude and longitude"""
+
+        start_time = timeit.default_timer()
+
         src_lat = self._location.get_latitude()
         src_long = self._location.get_longitude()
+
 
         distance = ControllerMath.haversine(src_lat, src_long, target_lat, target_long)   # calculate distance between locations
 
@@ -93,6 +99,11 @@ class AZEQ6Pedestal(IPedestalDevice):
         elevation_final = elevation_diff - self._el_offset
 
         self.slew_to_az_el(round(azimuth_final, 2), round(elevation_final, 2))  # move
+        end_time = timeit.default_timer()
+        if self._DEBUG:
+            exec_time = (end_time - start_time)
+            print("Time:{}".format(exec_time))
+            return exec_time
 
     def slew_thread(self, axis: int, dir: int):  # threaded method
         """ Threaded method to slew until limit is reached """
@@ -120,6 +131,7 @@ class AZEQ6Pedestal(IPedestalDevice):
 
     def slew(self, axis, dir):
         """ Starts the slew thread"""
+        start_time = timeit.default_timer()
         if self.is_moving():  # make sure pedestal not already moving
             self.stop_slew(axis)  # stop pedestal if already moving
 
@@ -129,6 +141,11 @@ class AZEQ6Pedestal(IPedestalDevice):
         self.set_moving(True)
         slew_thread.start()
 
+        end_time = timeit.default_timer()
+        if self._DEBUG:
+            exec_time = (end_time - start_time)
+            print("Time:{}".format(exec_time))
+            return exec_time
 
     def slew_preset(self, axis, dir):  #axis == 1: azimuth, 2: elevation
         if self._moving:  # make sure pedestal not already moving
@@ -139,9 +156,18 @@ class AZEQ6Pedestal(IPedestalDevice):
 
     def stop_slew(self, axis: int):
         """ Stop pedestal """
+        start_time = timeit.default_timer()
+
         self.set_moving(False)
         self._serial_client.stop_slew(axis)
         #self._pedestal_controller.set_moving(False)  #update moving status to false
+
+        end_time = timeit.default_timer()
+
+        if self._DEBUG:
+            exec_time = (end_time - start_time)
+            print("Time:{}".format(exec_time))
+            return exec_time
 
     #def sweep_thread(self, stop_sweep):
         """ Method to continously sweep pedestal between the 2 azimuth limits"""
@@ -161,16 +187,16 @@ class AZEQ6Pedestal(IPedestalDevice):
             time.sleep(delay)
             self.slew_to_az_el(self._az_limits[1], elevation)"""
 
-    def sweep_thread(self):  # TODO test this out
+    def sweep_thread(self):  # TODO tests this out
+        """ Threaded method that continuously sweep back and forth between azimuth limits"""
 
         azimuth = self.get_azimuth()
-        wait = (self._az_limits[1] - self._az_limits[0]) / self._slew_rate
-
         initial_wait = (azimuth - self._az_limits[0])/self._slew_rate
-        self._serial_client.slew(1, self._slew_rate, 2)  # initially go to smaller limit
-        time.sleep(initial_wait)
+        wait = (self._az_limits[1] - self._az_limits[0]) / self._slew_rate
+        slew_rate = self._slew_rate * 3600  # convert to arcsec/sec
 
-        slew_rate = self._slew_rate*3600  # convert to arcsec/sec
+        self._serial_client.slew(1, self._slew_rate, 2)  # initially go to smaller limit
+        time.sleep(initial_wait)  # delay by time needed to get to lower limit
 
         while self.is_moving():
             self._serial_client.slew(1, slew_rate, 1)
@@ -178,15 +204,10 @@ class AZEQ6Pedestal(IPedestalDevice):
             if self.is_moving():
                 self._serial_client.slew(1, slew_rate, 2)
 
-
-
-
-    def sweep_off(self):
-        self.stop_slew(1)
-        self.stop_slew(2)
-        self.set_moving(False)
-
     def sweep_on(self):
+        """ Start sweep mode """
+        start_time = timeit.default_timer()
+
         if self._moving:  # make sure pedestal not already moving
             self.stop_slew(1)  # stop pedestal if already moving
             self.stop_slew(2)
@@ -196,7 +217,13 @@ class AZEQ6Pedestal(IPedestalDevice):
         sweep_thread.daemon = True
         sweep_thread.start()
 
-    def slew_test(self, axis, dir):  # TODO test this on the pedestal
+        end_time = timeit.default_timer()
+        if self._DEBUG:
+            exec_time = (end_time - start_time)
+            print("Time:{}".format(exec_time))
+            return exec_time
+
+    def slew_test(self, axis, dir):  # TODO tests this on the pedestal
 
         if axis == 1:
             azimuth = self.get_azimuth()
