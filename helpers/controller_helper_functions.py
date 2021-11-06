@@ -56,6 +56,6 @@ if __name__ == "__main__":
     source_lat, source_long = -33.908109924189084, 18.395487481680284  # Twin towers
     target_lat, target_long = -33.90625351007551, 18.394488341295258
     #distance = ControllerMath.haversine(source_lat, source_long, target_lat, target_long)
-    #az = ControllerMath.determine_azimuth_difference(source_lat, source_long, target_lat, target_long)
-    el = ControllerMath.determine_elevation_difference(4,0,2)
-    print(el)
+    az = ControllerMath.determine_azimuth_difference(-33.9586853, 18.4601156, -33.9586853, 18.5000)
+    #el = ControllerMath.determine_elevation_difference(4,0,2)
+    print(az)
