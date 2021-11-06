@@ -119,7 +119,7 @@ def main():
 
     # Instantiate pedestal controller object:
     #pc = FakePedestalRemote.get_pedestal_device()
-    pc = AZEQ6PedestalRemote.get_fake_pedestal_device()
+    pc = AZEQ6PedestalRemote.get_pedestal_device_wo_gps()
     commands_init(pc)
 
 
