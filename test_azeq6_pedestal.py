@@ -20,14 +20,14 @@ def main():
     #print(pc.get_location().get_longitude())
     #pc.slew_positive_specific(1)
     #print(pc.get_azimuth_limits())
-    pc.slew(1,1)
-    sleep(2)
-    pc.stop_slew(1)
+    print(pc.get_location())
+    print(pc.get_altitude())
 
 if __name__ == "__main__":
     main()
-    try:
+    """try:
         while True:
             pass
     except KeyboardInterrupt:
-        print("Exiting")
+        print("Exiting")"""
+
