@@ -6,4 +6,3 @@ if __name__ == "__main__":
 
     location = gp.get_gga_msg()
     print(location)
-
