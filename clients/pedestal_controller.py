@@ -1,15 +1,16 @@
 from clients.gps_client import GPSClient
 from dtypes.gps_location import GPSLocation
 from clients.hand_controller_serial_client import SynscanSerialClient
-from interfaces.controller_interface import ControllerInterface
+from interfaces.connection_interface import ConnectionInterface
 from configparser import ConfigParser
 import os
+from helpers.controller_helper_functions import ControllerMath
 
 
 class PedestalController:
 
-    def __init__(self, serial_client: ControllerInterface, gps_client):
-        self._serial_client: ControllerInterface = serial_client
+    def __init__(self, serial_client: ConnectionInterface, gps_client): #TODO change tye to ConnectionInterface or more accurately, IPedestalDevice
+        self._serial_client: SynscanSerialClient = serial_client
         self._gps_client: GPSClient = gps_client
 
         self._location: GPSLocation = gps_client.get_location()
@@ -28,14 +29,20 @@ class PedestalController:
         self._az_limits: [float] = [-1, -1]
         self._el_limits: [float] = [-1, -1]
         self._slew_rate_limit: float = 100000
+
+        self._moving: bool = False
+        self._slew_rate_preset: int = 9
         self.controller_init()
 
     def controller_init(self) -> None:
-        self._az_limits = [self._cf["Constraints"]["MinAzimuth"], self._cf["Constraints"]["MaxAzimuth"]]
-        self._el_limits = [self._cf["Constraints"]["MinElevation"], self._cf["Constraints"]["MaxElevation"]]
-        self._slew_rate_limit = self._cf["Constraints"]["MaxSlewRate"]
-        self._az_offset: float = self._serial_client.get_azimuth()
-        self._el_offset: float = self._serial_client.get_elevation()
+        self._az_limits = [float(self._cf["Constraints"]["MinAzimuth"]), float(self._cf["Constraints"]["MaxAzimuth"])]
+        self._el_limits = [float(self._cf["Constraints"]["MinElevation"]), float(self._cf["Constraints"]["MaxElevation"])]
+        self._slew_rate_limit = float(self._cf["Constraints"]["MaxSlewRate"])
+        self._az_offset: float = float(self._serial_client.get_azimuth())
+        self._el_offset: float = float(self._serial_client.get_elevation())
+        self._true_north_offset =  int(self._cf["Navigation"]["True_North_Offset"])
+        self._horizontal_offset = float(self._cf["Navigation"]["Horizontal_Offset"])
+
 
     def update_config_file(self) -> None:
         """ Update config.ini file """
@@ -54,24 +61,36 @@ class PedestalController:
     def set_az_limits(self, az_limit: [float]) -> None:
         """ Set azimuth limits for pedestal"""
         self._az_limits = az_limit
-        self._cf["Constraints"]["MinAzimuth"] = str(self._az_limits[0])
-        self._cf["Constraints"]["MinAzimuth"] = str(self._az_limits[1])
-        self.update_config_file()  # write changes back to config file
+        self._cf["Constraints"]["MinAzimuth"] = str(az_limit[0])
+        self._cf["Constraints"]["MinAzimuth"] = str(az_limit[1])
+        #self.update_config_file()  # write changes back to config file
 
 
     def set_el_limits(self, el_limits: [float]) -> None:
         """ Set elevation limits for pedestal"""
         self._el_limits = el_limits
-        self.update_config_file()  # write changes back to config file
+        #self.update_config_file()  # write changes back to config file
 
     def set_slew_rate_limit(self, limit: float) -> None:
         """ Set slew rate limits for pedestal"""
         self._slew_rate_limit = limit
         self.update_config_file()  # write changes back to config file
 
+    def set_moving(self, status: bool):
+        self._moving = status
+
     """Getter methods:"""
-    def get_location(self):
+    def get_location_str(self):
+        """ Method to return string representation of location"""
         return self._location.__repr__()
+
+    def get_location(self):
+        """Return instance location object """
+        return self._location
+
+    def get_altitude(self):
+        return self._altitude
+
 
     def get_azimuth(self):
         return self._az_current
@@ -79,7 +98,21 @@ class PedestalController:
     def get_elevation(self):
         return self._el_current
 
+    def get_azimuth_limits(self):
+        return self._az_limits
 
+    def is_moving(self) -> bool:
+        return self._moving
+
+    def get_slew_preset(self):
+        return self._slew_rate_preset
+
+    def get_tn_offset(self):
+        """ MEthod to return true north offset"""
+        return self._true_north_offset
+
+    def get_horizontal_offset(self):
+        return self._horizontal_offset
 if __name__ == "__main__":
     print("hello")
     print(os.getcwd())

@@ -1,28 +1,38 @@
-import serial
+from abc import ABC, abstractmethod
 
+class IControllerInterface(ABC):
 
-class ControllerInterface:
-
-    def __init__(self):
-        self._serial_connection = serial.Serial(port='/dev/ttyUSB0',
-                                                    baudrate=9600,
-                                                    parity=serial.PARITY_NONE,
-                                                    stopbits=serial.STOPBITS_ONE)
-
-    def send_command(self, cmd: str):
-        self._serial_connection.write(cmd.encode())
-
-    def receive_response(self):
-        response = self._serial_connection.read_until(expected='#')  # controller response has # ending char
-        return response.decodde('UTF-8')
-
-    def communicate(self, cmd: str):
-        self.send_command(cmd)
-        response = self.receive_response()
-        return response
-
-    def get_azimuth(self):
+    @abstractmethod
+    def calibrate_command(self):
+        pass
+    @abstractmethod
+    def goto_az_el(self, azimuth: float, elevation: float):
         pass
 
-    def get_elevation(self):
+    @abstractmethod
+    def is_goto(self):
+        pass
+
+    @abstractmethod
+    def slew_fixed(self, axis: chr, preset: int, dir: chr):  #axis == 1: azimuth, 2: elevation
+        pass
+
+    @abstractmethod
+    def slew(self, axis: chr, slew_rate: float, dir: chr):  # rate is in arcseconds per sec
+        pass
+
+    @abstractmethod
+    def stop_slew(self, axis):
+        pass
+
+    @abstractmethod
+    def slew_step(self, axis, direction, slew_rate):
+        pass
+
+    @abstractmethod
+    def get_azimuth(self) :
+        pass
+
+    @abstractmethod
+    def get_elevation(self) :
         pass
