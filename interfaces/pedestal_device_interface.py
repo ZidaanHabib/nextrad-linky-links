@@ -29,10 +29,6 @@ class IPedestalDevice(ABC):
         pass
 
     @abstractmethod
-    def sweep_off(self):
-        pass
-
-    @abstractmethod
     def slew(self, axis, dir):
         pass
 
