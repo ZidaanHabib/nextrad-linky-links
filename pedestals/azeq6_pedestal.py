@@ -108,6 +108,9 @@ class AZEQ6Pedestal(IPedestalDevice):
         azimuth_final = azimuth_diff - self._az_offset
         elevation_final = elevation_diff - self._el_offset
 
+        if not self._az_limits[0] < azimuth_final < self._az_limits[1] or not self._el_limits[0] < elevation_final < self._el_limits[1]:
+            print("Target location out of bounds. ")
+            return
         self.slew_to_az_el(round(azimuth_final, 2), round(elevation_final, 2))  # move
 
         end_time = timeit.default_timer()
