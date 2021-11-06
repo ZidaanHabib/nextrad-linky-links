@@ -7,4 +7,5 @@ class FakePedestalRemote:
 
     @staticmethod
     def get_pedestal_device() -> IPedestalDevice:
+        """ Return an instance of a FakePedestalDevice"""
         return FakePedestal()

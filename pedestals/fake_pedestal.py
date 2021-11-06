@@ -1,6 +1,9 @@
 from interfaces.pedestal_device_interface import IPedestalDevice
 
-class FakePedestal(IPedestalDevice): #TODO add IPedestalDevice inheritance
+class FakePedestal(IPedestalDevice):
+
+    def __init__(self):
+        print("Fake pedestal created!")
 
     def calibrate(self):
         """ Fake calibration command"""
@@ -8,7 +11,7 @@ class FakePedestal(IPedestalDevice): #TODO add IPedestalDevice inheritance
 
     def slew_to_location(self, target_lat, target_long, target_altitude):
         """ Fake goto command"""
-        print("Slewing to lcoation from FakePedestal ")
+        print("Slewing to location from FakePedestal ")
 
     def slew(self, axis: chr, dir: chr):
         """ Fake slew command"""
