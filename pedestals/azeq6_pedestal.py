@@ -67,6 +67,10 @@ class AZEQ6Pedestal(IPedestalDevice):
 
     """Slewing methods: """
     def slew_to_az_el(self, azimuth: float, elevation: float):
+        """ Method to slew to specific azimuth and elevation coordinates """
+
+        start_time = timeit.default_timer()
+
         if azimuth < 0:
             while azimuth < 0:
                 azimuth += 360
@@ -77,6 +81,12 @@ class AZEQ6Pedestal(IPedestalDevice):
             print("Target position out of specified limits.")
         else:
             self._serial_client.goto_az_el(azimuth, elevation)
+
+        end_time = timeit.default_timer()
+        if self._DEBUG:
+            exec_time = (end_time - start_time)
+            print("Time:{}".format(exec_time))
+            return exec_time
 
     def slew_to_location(self, target_lat, target_long, target_altitude):
         """ Method to slew to a target location entered in latitude and longitude"""
@@ -99,6 +109,7 @@ class AZEQ6Pedestal(IPedestalDevice):
         elevation_final = elevation_diff - self._el_offset
 
         self.slew_to_az_el(round(azimuth_final, 2), round(elevation_final, 2))  # move
+
         end_time = timeit.default_timer()
         if self._DEBUG:
             exec_time = (end_time - start_time)
