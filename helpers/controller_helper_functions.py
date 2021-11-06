@@ -55,6 +55,7 @@ if __name__ == "__main__":
     #TODO check if pedestal rotates the long way around when moving to the (360 - 4.29)
     source_lat, source_long = -33.908109924189084, 18.395487481680284  # Twin towers
     target_lat, target_long = -33.90625351007551, 18.394488341295258
-    distance = ControllerMath.haversine(source_lat, source_long, target_lat, target_long)
-    az = ControllerMath.determine_azimuth_difference(source_lat, source_long, target_lat, target_long)
-    print(az)
+    #distance = ControllerMath.haversine(source_lat, source_long, target_lat, target_long)
+    #az = ControllerMath.determine_azimuth_difference(source_lat, source_long, target_lat, target_long)
+    el = ControllerMath.determine_elevation_difference(4,0,2)
+    print(el)
