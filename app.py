@@ -1,3 +1,5 @@
+from time import sleep, time
+
 from paho.mqtt import client as mqtt
 from configparser import ConfigParser
 
@@ -9,7 +11,6 @@ from remotes.azeq6_remote import AZEQ6PedestalRemote
 from remotes.fake_pedestal_remote import FakePedestalRemote
 #from commands.message_parser import MessageParser
 import argparse
-
 
 """ MQTT call backs:"""
 def on_connect(client, userdata, flags, rc):
@@ -29,10 +30,10 @@ def on_subscribe(client, userdata, mid, granted_qos):
 
 
 def on_message(client, userdata, msg_enc):
+    time_rec = time()
     msg = msg_enc.payload.decode("UTF-8")
     print("Message received: " + msg)
-    select_button(msg)
-
+    select_button(msg, time_rec)
 
 #def mqtt_monitor_thread():
 
@@ -73,9 +74,9 @@ def commands_init(pedestal_device):
     global goto_location_pressed
     goto_location_pressed = Button(goto_location_command)
 
-def select_button(msg):
+def select_button(msg, time_rec):
     mqtt_cmds = {"calibrate": "CALIB", "stop": "STOP", "slew": "SLEW", "goto_location": "GOTO-LOC",
-                 "goto_az_el": "GOTO-AZEL",  "sweep": "SWEEP", "get_pos": "GET-AZ-EL"
+                 "goto_az_el": "GOTO-AZEL",  "sweep": "SWEEP", "get_pos": "GET-AZ-EL", "timing": "TIMING-TEST"
                  }
     msg_list = msg.split("/")
     if msg_list[0] == mqtt_cmds["calibrate"]:
@@ -105,6 +106,12 @@ def select_button(msg):
         goto_location_pressed.press(lat, long, alt)
     elif msg_list[0] == mqtt_cmds["sweep"]:
         sweep_pressed.press()
+    elif msg_list[0] == mqtt_cmds["timing"] and debug:
+        time_sent = float(msg_list[1])
+        time_elapsed = (time_rec - time_sent)*1000
+        print("Time taken to receive test message: {} ms".format(time_elapsed))
+        with open("mqtt_latency.txt", "a+") as f:
+            f.write(str(time_elapsed) + "\n")
 
 
 
@@ -117,8 +124,11 @@ def main():
 
 
     if args.debug_flag:
+        global debug
+        debug = True
         debug_pressed.press()  # check if debug mode entered
         print("--Debug Mode Active--")
+
 
     cf = ConfigParser()
     cf.read("config.ini")
