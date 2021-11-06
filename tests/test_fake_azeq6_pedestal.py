@@ -8,6 +8,7 @@ def main():
     pc = AZEQ6PedestalRemote.get_fake_pedestal_device()  # instantiate fake AZEQ6 # pedestal using Fake gps client and fake controller client
     print(pc.get_location())
     print(pc.get_altitude())
+    pc.slew_to_location(1,1,1)
 
 if __name__ == "__main__":
     main()
