@@ -118,8 +118,11 @@ def select_button(msg, time_rec):
 def main():
 
     # Instantiate pedestal controller object:
-    #pc = FakePedestalRemote.get_pedestal_device()
-    pc = AZEQ6PedestalRemote.get_pedestal_device_wo_gps()
+    try:
+        pc = AZEQ6PedestalRemote.get_pedestal_device()
+    except Exception as e:
+        pc = FakePedestalRemote.get_pedestal_device()
+
     commands_init(pc)
 
 
@@ -134,7 +137,7 @@ def main():
     cf.read("config.ini")
 
     broker = cf["MQTT"]["Broker"]
-    #broker = "169.254.228.235"
+    pi_client = cf["MQTT"]["client_name"]
     client = mqtt.Client("Pi-1", protocol=mqtt.MQTTv31)
 
     # bind callbacks:
@@ -150,8 +153,6 @@ def main():
         client.connect(host="localhost", port=1883) # "169.254.228.235"
     except Exception as e:
         print(e)
-    #client.connect(host="mqtt.eclipseprojects.io", port=1883, keepalive=60, keepalive=60)
-    #client.connect(host="raspberrypizero.local", port=1883, keepalive=60)
 
     client.loop_start() # start mqtt client loop
     try:
